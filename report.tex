@@ -1,0 +1,52 @@
+\documentclass{article}
+\usepackage{alltt}
+\title{Obstacle Detection and Avoidance Using TurtleBot Platform and XBox Kinect}
+\author{Sol Boucher}
+\date{\today}
+\begin{document}
+\maketitle
+\section{Starting the TurtleBot}
+\label{sec:start}
+\begin{enumerate}
+\item{Disconnect both chargers from the robot, if applicable.}
+\item{Turn on the iRobot Create by pressing the power button on its back; the power light should turn green.}
+\item{Unplug and remove the laptop from the TurtleBot.}
+\item{Open the laptop's lid and press the power button.}
+\item{Close the laptop, replace it in the chassis, and reconnect the cables.}
+\item{Wait until the Ubuntu startup noise sounds; at this point, the robot is ready to accept connections.}
+\item{\label{lst:connopen}From another machine, enter: \texttt{\$\ ssh turtlebot@turtlebot.rit.edu}}
+\item{\label{lst:connclose}When prompted for a password, use: \texttt{turtlebot}}
+\item{Once authenticated, start the robot service: \texttt{\$\ sudo service turtlebot start}}
+\item{A few seconds later, the iRobot Create should beep and its power light should go out.  The robot is now ready for use.}
+\end{enumerate}
+
+\section{Stopping the TurtleBot}
+\begin{enumerate}
+\item{Connect to the robot by following steps \ref{lst:connopen} through \ref{lst:connclose} of section \ref{sec:start} on page \pageref{sec:start}}
+\item{Stop the robot service using: \texttt{\$\ sudo service turtlebot stop}}
+\item{Shut down the robot laptop: \texttt{\$\ sudo halt}}
+\item{Turn off the iRobot Create by pressing its power button.}
+\item{Plug in the chargers for the iRobot Create and the laptop.}
+\end{enumerate}
+
+\section{Setting up a development workstation}
+\begin{enumerate}
+\item{Ready a machine for your use.  (We'll assumer you're using Ubuntu 10.04 through 11.10.)}
+\item{Ensure that your system has either a recognized hostname or a static IP that is visible from the robot.}
+\item{Add the ROS repository to your system: \texttt{\$\ sudo apt-add-repository http://packages.ros.org/ros/ubuntu}}
+\item{Download the ROS package signing key: \texttt{\$\ wget http://packages.ros.org/ros.key}}
+\item{Add the signing key to your system: \texttt{\$\ sudo apt-key add ros.key}}
+\item{Refresh your package archive cache: \texttt{\$\ sudo apt-get update}}
+\item{Install the TurtleBot desktop suite: \texttt{\$\ sudo apt-get install ros-electric-turtlebot-desktop}}
+\item{Edit your bash configuration(\texttt{\$\ editor \~{}/.bashrc}), adding the following lines to the end:}
+\begin{alltt}\begin{itemize}
+\item{source /opt/ros/electric/setup.bash}
+\item{export ROS_MASTER_URI=http://turtlebot.rit.edu:11311}
+\item{export ROS_HOSTNAME=<non-NAT'd hostname or IP>}
+\item{export ROS_PACKAGE_PATH=<directory where you'll store your source code>:\$ROS_PACKAGE_PATH}
+\end{itemize}\end{alltt}
+\item{Write and close the file, then enter the following command in each of your open terminals: \texttt{\$\ source \~{}/.bashrc}}
+\item{Install the Chrony NTP daemon: \texttt{\$\ sudo apt-get install chrony}}
+\item{Synchronize the clock: \texttt{\$\ sudo ntpdate ntp.rit.edu}}
+\end{enumerate}
+\end{document}
