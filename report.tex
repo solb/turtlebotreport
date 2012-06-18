@@ -34,14 +34,18 @@ Nguyen, Van-Duc. (2012). Obstacle Avoidance using the Kinect. 15 June 2012 <\url
 \item{\label{lst:connclose}When prompted for a password, use: \texttt{turtlebot}}
 \item{Once authenticated, start the robot service: \texttt{\$\ sudo service turtlebot start}}
 \item{A few seconds later, the iRobot Create should beep and its power light should go out.  The robot is now ready for use.}
+\item{Enter the following command to enable the Kinect: \texttt{\$\ nohup roslaunch turtlebot_bringup kinect.launch &}}
+\item{You may now safely close your robot shell connection: \texttt{\$\ exit}}
 \end{enumerate}
 
 \section{Stopping the TurtleBot}
 \begin{enumerate}
 \item{Connect to the robot by following steps \ref{lst:connopen} through \ref{lst:connclose} of section \ref{sec:start} on page \pageref{sec:start}}
+\item{Stop the Kinect with: \texttt{\$\ kill `ps -ef | grep init | grep -v grep | tr -s " " | cut -d " " -f 2`}}
+\item{Release the iRobot Create with: \texttt{\$\ rosservice call /turtlebot_node/set_operation_mode 1}
 \item{Stop the robot service using: \texttt{\$\ sudo service turtlebot stop}}
 \item{Shut down the robot laptop: \texttt{\$\ sudo halt}}
-\item{Turn off the iRobot Create by pressing its power button.}
+\item{Turn off the Create by pressing its power button.}
 \item{Plug in the chargers for the iRobot Create and the laptop.}
 \end{enumerate}
 
