@@ -70,6 +70,8 @@ Next, I discovered a relatively minor but undeniable problem: given a scene wher
 Because of how heavily its depth view was cropped, however, the robot was still prone to making poor decisions about which direction to turn.  In order to rectify this problem, I only cropped the forward region in the z-dimension, and began considering all points of any depth when determining which direction to turn.  This, however, resulted in the robot's being easily distracted by large objects that were far away; for instance, it would turn away from even wide hallways in search of open space.  This effect was countered by switching from choosing the direction in which to turn using the number of points in each side field of view to doing so using the average depth of the points in each of these fields.  The reader will observe a potential problem with this approach: when using the total number of points, it is difficult for a single noisy point to influence the robot's choice of direction, since it will only increase its respective direction's favorability by one unit.  In contrast, when examining only points' average distances, a single poorly-positioned noisy point could very easily skew that direction's favorability by a significant amount, especially if there aren't many points in view to begin with.  However, this is not as much of a concern as it might appear, since almost all of the Kinect's noise is confined to the far part of the z-dimension; in case the algorithm were to be used on a sensor that suffered from or conditions that favored nearer interference, an outlier filter might be added in order to eliminate voxels appearing far away from any others. \\
 A trivial approach such as checking whether the area immediately ahead is clear and gauging turns by examining the number of points or their average depth, however, will never succeed in navigating more complex scenarios.  For instance, in a maze-like situation or other confined space, the robot will attempt to turn long before reaching a wall, missing the side passageway because it lacks the ability to determine that the turning corridor represents a traversable passage and turns all the way around before it ever gets there.  In order to solve this problem, it is necessary to implement the ability to distinguish between individual objects, which I did by using the Point Cloud Library's built-in implementation of the simple Euclidean cluster detection algorithm. \\
 With the ability in place to segment separate objects, I set out to develop a simple algorithm capable of determining the perpendicular distances between their edges; the resultant gap measurements could then be compared to the known width of the robot to determine whether each space was traversable.  In order to find out how far apart two arbitrary objects are, however, one must first know the two component points that lie closest to each other.  As a fast and easy initial implementation, I accomplished this by averaging the x- and z-coordinates of all the points in each object: starting with these points as reference points and alternating between the two objects, I then iteratively discarded from the current object all points except those falling closer to the other object's reference point than did the current object's reference point, reassigning the point minimally distant from that same reference point on the other object as the current object's new reference point. \\
+The robot was now able to discern the locations of inter-object gaps wide enough for it to fit through, but it was so adept at doing so that it even picked up those gaps lying perpendicular to the robot's view, as well as those that were behind additional obstacles.  The former problem was alleviated simply by adding a slope threshold that filtered out all gaps that were to steep to fit through.  The latter, however, required defining a tunnel-like region of constant width and height beginning at the robot's viewpoint and stretching through the gap of interest by a depth approximately equal to the robot's diameter.  With the gaps properly detected and filtered, I ranked the remaining options based on their distance from the center.  Unfortunately, it soon became clear that although this approach did a better job of finding logical paths in confined spaces, it was largely unsuitable for use with the Kinect because of the sensor's inability to detect sufficiently-close obstacles.  This meant that, before even getting through a gap, the bot would lose sight of it.  In order to work around this hardware limitation, a state machine could have been implemented and the ability to measure driving distance could have been added.  Unfortunately, such steps would have resulted in complete blindness during the time the robot was traversing the gap, and consequently a vulnerability to any unexpected environmental changes during that time.  As such, I decided to abandon the spacing detection approach and look for a more general and universally-applicable solution. \\
+Toward the end of development of the gap detection algorithm, a severe problem surfaced; it was discovered that, due to a combination of distortions in the robot's coordinate system and noise, the robot was unable to detect objects as much as a couple inches high.  Noticing that all objects created prominent occlusions on the ground, I set out to try detecting these holes in the ground plane.  First, a section of the floor corresponding to the region immediately in front of the robot---and hence in its path---was selected from the rest of the point cloud by tight cropping.  Next, the slope of the floor was modeled to account for the Kinect's coordinate distortion, and all points falling outside a given height tolerance of this plane were filtered out.  The remaining floor points were then transformed and flattened such that they occupied the XZ-plane.  By examining the surface normals of the transformed sample, the edge points could be estimated.  Then, a minimum neighbors in radius outlier removal filter was applied to eliminate false positives.  The results were promising when tested on a smooth carpet: after some fine-tuning, no false positives were being detected and a good number of edge points arose when any given obstruction was placed in front of the sensor.  Unfortunately, speed had become a problem, as estimating the edge points was taking several seconds per sample.
 
 \section{Results and Discussion}
 TODO
@@ -141,6 +143,44 @@ Talukder, A. \textit{et al.} (2002). Fast and reliable obstacle detection and se
 \item{Write and close the file, then enter the following command in each of your open terminals: \texttt{\$\ source \~{}/.bashrc}}
 \item{Install the Chrony NTP daemon: \texttt{\$\ sudo apt-get install chrony}}
 \item{Synchronize the clock: \texttt{\$\ sudo ntpdate ntp.rit.edu}}
+\end{enumerate}
+
+\section{Upgrading to the Latest Version of PCL}
+The version of the Point Cloud Library shipped with ROS lags significantly behind that available directly from the community.  These instructions show how to install the latest version of PCL on top of an existing ROS Electric installation.
+\begin{enumerate}
+\item{Create a folder hierarchy contain the build files and the replacement copy of the perception\_pcl stack: \texttt{\$\ mkdir -p \~{}/ros/prefix/lib}}
+\item{Move into the deepest level: \texttt{\$\ cd \~{}/ros/prefix/lib}}
+\item{Install the CMake configuration utility: \texttt{\$\ sudo apt-get install cmake-curses-gui}}
+\item{Download the VTK library source code: \texttt{\$\ wget vtk.org/files/release/5.6/vtk-5.6.1.tar.gz}}
+\item{Extract the source archive you just fetched: \texttt{\$\ tar xzvf vtk*}}
+\item{Move into the extracted files' directory: \texttt{\$\ cd VTK}}
+\item{Run the CMake configuration interface: \texttt{\$\ ccmake .}}
+\item{In the UI, hit the \texttt{c} key, enable the \texttt{BUILD\_SHARED\_LIBS} and \texttt{VTK\_USE\_QT} parameters, then hit \texttt{c} and \texttt{q}.}
+\item{Build the library: \texttt{\$\ make}}
+\item{Move up one two levels into the \texttt{prefix} directory: \texttt{\$\ cd ../..}}
+\item{Download the Boost library source: \texttt{\$\ wget sf.net/projects/boost/files/boost/1.46.1/boost\_1\_46\_1.tar.bz2}}
+\item{Extract that source archive: \texttt{\$\ tar xjvf boost*}}
+\item{Move into the new directory: \texttt{\$\ cd boost*}}
+\item{Configure the build script: \texttt{\$\ ./bootstrap.sh}}
+\item{Build and install the project into \texttt{/usr/local}: \texttt{\$\ sudo ./bjam install}}
+\item{Move out into the top level of the folder structure you created: \texttt{\$\ cd \~{}/ros}}
+\item{Install an extra ROS stack that will be required for the build: \texttt{\$\ sudo apt-get install ros-electric-qt-ros}}
+\item{Install any remaining build dependencies: \texttt{\$\ rosdep install perception\_pcl}}
+\item{Create a new ROS overlay in the current directory: \texttt{\$\ rosinstall . /opt/ros/electric}}
+\item{Obtain a rosinstall file describing the repository for the perception stack: \texttt{\$\ roslocate info perception\_pcl $\rangle$ perception\_pcl.rosinstall}}
+\item{Edit the rosinstall file to point at the correct repository for Electric: \texttt{\$\ sed -i s/unstable/electric\_unstable/ perception\_pcl.rosinstall }}
+\item{Fetch the makefiles for the stack: \texttt{\$\ rosinstall . perception\_pcl.rosinstall}}
+\item{Inform your shell of the overlay's location: \texttt{\$\ source setup.bash}}
+\item{Move into the \texttt{cminpack} directory: \texttt{\$\ cd perception\_pcl/cminpack}}
+\item{Build the cminpack package: \texttt{\$\ make}}
+\item{Move into the \texttt{flann} directory: \texttt{\$\ cd ../flann}}
+\item{Build the flann package: \texttt{\$\ make}}
+\item{Move into the \texttt{pcl} directory: \texttt{\$\ cd ../pcl}}
+\item{Build the PCL codebase: \texttt{\$\ CMAKE\_PREFIX\_PATH=\~{}/ros/prefix make}}
+\item{Move into the \texttt{pcl\_ros} directory: \texttt{\$\ cd ../pcl\_ros}}
+\item{Build the ROS PCL bindings: \texttt{\$\ make}}
+\item{Move back out into the stack: \texttt{\$\ cd ..}}
+\item{Build the stack's particulars: \texttt{\$\ make}}
 \end{enumerate}
 
 \section{ROS Commands}
