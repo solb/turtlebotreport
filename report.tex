@@ -148,25 +148,10 @@ Talukder, A. \textit{et al.} (2002). Fast and reliable obstacle detection and se
 \section{Upgrading to the Latest Version of PCL}
 The version of the Point Cloud Library shipped with ROS lags significantly behind that available directly from the community.  These instructions show how to install the latest version of PCL on top of an existing ROS Electric installation.
 \begin{enumerate}
-\item{Create a folder hierarchy contain the build files and the replacement copy of the perception\_pcl stack: \texttt{\$\ mkdir -p \~{}/ros/prefix/lib}}
-\item{Move into the deepest level: \texttt{\$\ cd \~{}/ros/prefix/lib}}
-\item{Install the CMake configuration utility: \texttt{\$\ sudo apt-get install cmake-curses-gui}}
-\item{Download the VTK library source code: \texttt{\$\ wget vtk.org/files/release/5.6/vtk-5.6.1.tar.gz}}
-\item{Extract the source archive you just fetched: \texttt{\$\ tar xzvf vtk*}}
-\item{Move into the extracted files' directory: \texttt{\$\ cd VTK}}
-\item{Run the CMake configuration interface: \texttt{\$\ ccmake .}}
-\item{In the UI, hit the \texttt{c} key, enable the \texttt{BUILD\_SHARED\_LIBS} and \texttt{VTK\_USE\_QT} parameters, then hit \texttt{c} and \texttt{q}.}
-\item{Build the library: \texttt{\$\ make}}
-\item{Move up one two levels into the \texttt{prefix} directory: \texttt{\$\ cd ../..}}
-\item{Download the Boost library source: \texttt{\$\ wget sf.net/projects/boost/files/boost/1.46.1/boost\_1\_46\_1.tar.bz2}}
-\item{Extract that source archive: \texttt{\$\ tar xjvf boost*}}
-\item{Move into the new directory: \texttt{\$\ cd boost*}}
-\item{Configure the build script: \texttt{\$\ ./bootstrap.sh}}
-\item{Build and install the project into \texttt{/usr/local}: \texttt{\$\ sudo ./bjam install}}
-\item{Move out into the top level of the folder structure you created: \texttt{\$\ cd \~{}/ros}}
-\item{Install an extra ROS stack that will be required for the build: \texttt{\$\ sudo apt-get install ros-electric-qt-ros}}
-\item{Install any remaining build dependencies: \texttt{\$\ rosdep install perception\_pcl}}
+\item{Create a folder to contain the build files and the replacement copy of the perception\_pcl stack: \texttt{\$\ mkdir \~{}/ros}}
+\item{Install the dependencies for the rosinstall utility: \texttt{\$\ sudo easy\_install -U rosinstall}}
 \item{Create a new ROS overlay in the current directory: \texttt{\$\ rosinstall . /opt/ros/electric}}
+\item{Install any missing build dependencies: \texttt{\$\ rosdep install perception\_pcl}}
 \item{Obtain a rosinstall file describing the repository for the perception stack: \texttt{\$\ roslocate info perception\_pcl $\rangle$ perception\_pcl.rosinstall}}
 \item{Edit the rosinstall file to point at the correct repository for Electric: \texttt{\$\ sed -i s/unstable/electric\_unstable/ perception\_pcl.rosinstall }}
 \item{Fetch the makefiles for the stack: \texttt{\$\ rosinstall . perception\_pcl.rosinstall}}
@@ -176,7 +161,8 @@ The version of the Point Cloud Library shipped with ROS lags significantly behin
 \item{Move into the \texttt{flann} directory: \texttt{\$\ cd ../flann}}
 \item{Build the flann package: \texttt{\$\ make}}
 \item{Move into the \texttt{pcl} directory: \texttt{\$\ cd ../pcl}}
-\item{Build the PCL codebase: \texttt{\$\ CMAKE\_PREFIX\_PATH=\~{}/ros/prefix make}}
+\item{Select the most recent tagged version of the code, for instance: \texttt{\$\ sed -i s/$\backslash\backslash$/trunk/$\backslash\backslash$/tags$\backslash\backslash$/pcl-1.6.0rc1/ Makefile}}
+\item{Build the PCL codebase: \texttt{\$\ make}}
 \item{Move into the \texttt{pcl\_ros} directory: \texttt{\$\ cd ../pcl\_ros}}
 \item{Build the ROS PCL bindings: \texttt{\$\ make}}
 \item{Move back out into the stack: \texttt{\$\ cd ..}}
