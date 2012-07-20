@@ -151,6 +151,7 @@ Talukder, A. \textit{et al.} (2002). Fast and reliable obstacle detection and se
 The version of the Point Cloud Library shipped with ROS lags significantly behind that available directly from the community.  These instructions show how to install the latest version of PCL on top of an existing ROS Electric installation.
 \begin{enumerate}
 \item{Create a folder to contain the build files and the replacement copy of the perception\_pcl stack: \texttt{\$\ mkdir \~{}/ros}}
+\item{Install the Python package management utilities: \texttt{\$\ sudo apt-get install python-setuptools}}
 \item{Install the dependencies for the rosinstall utility: \texttt{\$\ sudo easy\_install -U rosinstall}}
 \item{Create a new ROS overlay in the current directory: \texttt{\$\ rosinstall . /opt/ros/electric}}
 \item{Install any missing build dependencies: \texttt{\$\ rosdep install perception\_pcl}}
