@@ -100,7 +100,6 @@ Talukder, A. \textit{et al.} (2002). Fast and reliable obstacle detection and se
 {\Large Appendices} \\
 \appendix
 \section{Starting the TurtleBot}
-\label{sec:start}
 \begin{enumerate}
 \item{Disconnect both chargers from the robot, if applicable.}
 \item{Turn on the iRobot Create by pressing the power button on its back; the power light should turn green.}
@@ -108,20 +107,21 @@ Talukder, A. \textit{et al.} (2002). Fast and reliable obstacle detection and se
 \item{Open the laptop's lid and press the power button.}
 \item{Close the laptop, replace it in the chassis, and reconnect the cables.}
 \item{Wait until the Ubuntu startup noise sounds; at this point, the robot is ready to accept connections.}
-\item{\label{lst:connopen}From another machine, enter: \texttt{\$\ ssh turtlebot@turtlebot.rit.edu}}
-\item{\label{lst:connclose}When prompted for a password, use: \texttt{turtlebot}}
+\item{From another machine, enter: \texttt{\$\ ssh turtlebot@turtlebot.rit.edu}}
 \item{Once authenticated, start the robot service: \texttt{\$\ sudo service turtlebot start}}
 \item{A few seconds later, the iRobot Create should beep and its power light should go out.  The robot is now ready for use.}
 \item{Enter the following command to enable the Kinect: \texttt{\$\ nohup roslaunch turtlebot\_bringup kinect.launch \&}}
+\item{Enter the following command to enable the Interactive tab in RViz: \texttt{\$\ nohup rosrun turtlebot\_interactive\_markers turtlebot\_marker\_server \&}}
 \item{You may now safely close your robot shell connection: \texttt{\$\ exit}}
 \end{enumerate}
 
 \section{Stopping the TurtleBot}
 \begin{enumerate}
-\item{Connect to the robot by following steps \ref{lst:connopen} through \ref{lst:connclose} of Appendix \ref{sec:start} on page \pageref{sec:start}}
+\item{Connect to the robot.}
+\item{Stop the Interactive Markers server: \texttt{\$\ kill `ps -ef | grep marker\_server | tr -s " " | cut -d " " -f 2`}}
 \item{Stop the Kinect with: \texttt{\$\ kill `ps -ef | grep kinect.launch | grep -v grep | tr -s " " | cut -d " " -f 2`}}
 \item{Release the iRobot Create with: \texttt{\$\ rosservice call \\ /turtlebot\_node/set\_operation\_mode 1}}
-\item{Stop the robot service using: \texttt{\$\ sudo service turtlebot stop}}
+\item{At this point, it is safe to plug the charger into the iRobot Create.  If you want to turn of the laptop as well, continue with the below steps instead.}
 \item{Shut down the robot laptop: \texttt{\$\ sudo halt}}
 \item{Turn off the Create by pressing its power button.}
 \item{Plug in the chargers for the iRobot Create and the laptop.}
@@ -129,23 +129,37 @@ Talukder, A. \textit{et al.} (2002). Fast and reliable obstacle detection and se
 
 \section{Setting up a Development Workstation}
 \begin{enumerate}
-\item{Ready a machine for your use.  (We'll assumer you're using Ubuntu 10.04 through 11.10.)}
-\item{Ensure that your system has either a recognized hostname or a static IP that is visible from the robot.}
-\item{Add the ROS repository to your system: \texttt{\$\ sudo apt-add-repository http://packages.ros.org/ros/ubuntu}}
+\item{Ready a machine for your use.  (We'll assume you're using Ubuntu 10.04 through 11.10.)}
+\item{Ensure that your system has either a hostname or a static IP that is visible from the robot.}
 \item{Download the ROS package signing key: \texttt{\$\ wget \\ http://packages.ros.org/ros.key}}
 \item{Add the signing key to your system: \texttt{\$\ sudo apt-key add ros.key}}
-\item{Refresh your package archive cache: \texttt{\$\ sudo apt-get update}}
+\item{Add the ROS repository to your system: \texttt{\$\ sudo apt-add-repository http://packages.ros.org/ros/ubuntu}}
+\item{Update your repository cache: \texttt{\$\ sudo apt-get update}}
 \item{Install the TurtleBot desktop suite: \texttt{\$\ sudo apt-get install \\ ros-electric-turtlebot-desktop}}
-\item{Edit your bash configuration(\texttt{\$\ editor \~{}/.bashrc}), adding the following lines to the end:}
+\item{Edit your bash configuration(\texttt{\$\ \$EDITOR \~{}/.bashrc}), adding the following lines to the end:}
 \begin{alltt}\begin{itemize}
 \item{source /opt/ros/electric/setup.bash}
 \item{export ROS\_MASTER\_URI=http://turtlebot.rit.edu:11311}
-\item{export ROS\_HOSTNAME= \\ <non-NAT'd hostname or IP>}
 \item{export ROS\_PACKAGE\_PATH= \\ <directory where you'll store your source code>:\$ROS\_PACKAGE\_PATH}
 \end{itemize}\end{alltt}
 \item{Write and close the file, then enter the following command in each of your open terminals: \texttt{\$\ source \~{}/.bashrc}}
 \item{Install the Chrony NTP daemon: \texttt{\$\ sudo apt-get install chrony}}
 \item{Synchronize the clock: \texttt{\$\ sudo ntpdate ntp.rit.edu}}
+\item{If the robot and the workstation both have hostnames, but they are in different domains, perform the following steps.  (In this example, the robot is at turtlebot.rit.edu and the workstation is at turtlecmd.wireless.rit.edu.)}
+\begin{enumerate}
+\item{On each machine, right-click the Network Manager applet in the notification area, choose \textit{Edit Connections...}, and open the properties for the specific connection that is being used.}
+\item{On the IPv4 Settings tab, change the \textit{Method} dropdown to \texttt{Automatic (DHCP) address only.}}
+\item{In the \textit{DNS servers} field, enter the same DNS servers that were being used, with commas in between (e.g. \texttt{129.21.3.17, 129.21.4.18}).}
+\item{In the \textit{Search domains} field, enter the local machine's domain first, followed by the remote machine's.  For instance, in our example, one might enter \texttt{rit.edu., wireless.rit.edu.} on the robot and \texttt{wireless.rit.edu., rit.edu.} on the workstation.}
+\item{Save all your changes and exit the Network Connections dialog.}
+\item{Force a reconnection by clicking on the Network Manager applet, then selecting the network to which you are already connected.}
+\end{enumerate}
+\item{If the workstation has not hostname and is to be reached via a static IP, make the following changes on the robot instead:}
+\begin{enumerate}
+\item{Edit the robot's hosts file: \texttt{\$\ sudo \$EDITOR /etc/hosts}}
+\item{For each static host, add a line such as: \texttt{$\langle$IP address$\rangle$ $\langle$hostname$\rangle$}.  It is important to note that the \textit{hostname} you use must exactly match the output of \texttt{\$\ hostname} on the development workstation.}
+\item{Save the file and quit, and the changes should take effect immediately and automatically.}
+\end{enumerate}
 \end{enumerate}
 
 \section{Upgrading to the Latest Version of PCL}
@@ -165,13 +179,48 @@ The version of the Point Cloud Library shipped with ROS lags significantly behin
 \item{Move into the \texttt{flann} directory: \texttt{\$\ cd ../flann}}
 \item{Build the flann package: \texttt{\$\ make}}
 \item{Move into the \texttt{pcl} directory: \texttt{\$\ cd ../pcl}}
-\item{Select the most recent tagged version of the code, for instance: \texttt{\$\ sed -i s/$\backslash\backslash$/trunk/$\backslash\backslash$/tags$\backslash\backslash$/pcl-1.6.0rc1/ Makefile}}
+\item{Make a backup copy of the makefile: \texttt{\$\ cp Makefile Makefile.orig}}
+\item{Select the most recent tagged version of the code, for instance: \texttt{\$\ sed -i s/$\backslash\backslash$/trunk/$\backslash\backslash$/tags$\backslash\backslash$/pcl-1.6.0/ Makefile}}
 \item{Build the PCL codebase: \texttt{\$\ make}}
 \item{Move into the \texttt{pcl\_ros} directory: \texttt{\$\ cd ../pcl\_ros}}
 \item{Build the ROS PCL bindings: \texttt{\$\ make}}
 \item{Move back out into the stack: \texttt{\$\ cd ..}}
 \item{Build the stack's particulars: \texttt{\$\ make}}
 \item{Edit your bashrc file to add the following line before the line that sets your \texttt{ROS\_PACKAGE\_PATH}: \texttt{source \~{}/ros/setup.bash}}
+\item{If you intend on continuing to use your current terminals, enter the following in each after saving the file: \texttt{\$\ source ~{}/.bashrc}}
+\end{enumerate}
+
+\section{Backporting in a Class from the PCL Trunk}
+Often, the trunk version of the Point Cloud Library will fail to compile; therefore, it may be desirable to backport a specific class from trunk into a released copy of the library.  For instance, the code written for this project relies on the OrganizedEdgeDetection class, which---at the time of writing---is only available from trunk.  These steps present an example of how to backport this specific class and the new subsystem on which it relies into the 1.6.0 release of PCL.  We'll assume that the steps from the previous section have already been completed.
+\begin{enumerate}
+\item{Change to the directory above your newly-compiled copy of the Point Cloud Library: \texttt{\$\ roscd pcl/..}}
+\item{Make a copy of the whole library folder: \texttt{\$\ cp -r pcl pcl.trunk}}
+\item{Move into the folder you just created: \texttt{\$\ cd pcl.trunk}}
+\item{Restore the backup version of the makefile in order to switch back to trunk: \texttt{\$\ mv Makefile.orig Makefile}}
+\item{Clean out the directory: \texttt{\$\ make wipe}}
+\item{Re-download the latest code: \texttt{\$\ make download}}
+\item{Move back up one level in preparation for copying over the new files: \texttt{\$\ cd ..}}
+\item{Copy the header from trunk to release: \texttt{\$\ cp pcl.trunk/build/pcl\_trunk/features/include/pcl/features/organized\_edge\_detection.h pcl/build/pcl\_trunk/features/include/pcl/features}}
+\item{Copy the templated header from trunk to release: \texttt{\$\ cp pcl.trunk/build/pcl\_trunk/features/include/pcl/features/impl/organized\_edge\_detection.hpp pcl/build/pcl\_trunk/features/include/pcl/features/impl}}
+\item{Copy the source from trunk to release: \texttt{\$\ cp pcl.trunk/build/pcl\_trunk/features/src/organized\_edge\_detection.cpp pcl/build/pcl\_trunk/features/src}}
+\item{Copy a required new subsystem from trunk to release: \texttt{\$\ cp -r pcl.trunk/build/pcl\_trunk/2d pcl/build/pcl\_trunk}}
+\item{Move into the newly-assembled PCL build directory: \texttt{\$\ cd pcl/build/pcl\_trunk}}
+\item{Edit the \texttt{2d} package's build configuration file: \texttt{\$\ \$EDITOR 2d/CMakeLists.txt}}
+\begin{enumerate}
+\item{For each header linked under \texttt{set(incs}, check whether it has a templated header in \texttt{2d/include/pcl/2d/impl}.}
+\item{For each such header, add a corresponding line under \texttt{set(incs}; for instance, the line to add for \texttt{include/pcl/\$\{SUBSYS\_NAME\}/convolution\_2d.h} would be \texttt{include/pcl/\$\{SUBSYS\_NAME\}/impl/convolution\_2d.hpp}}
+\end{enumerate}
+\item{Edit the \texttt{features} package's build configuration: \texttt{\$\ \$EDITOR features/CMakeLists.txt}}
+\begin{enumerate}
+\item{At the end of the SUBSYS\_DEPS list, add: \texttt{2d}}
+\item{Under \texttt{set(incs}, add: \texttt{include/pcl/\$\{SUBSYS\_NAME\}/organized\_edge\_detection.h}}
+\item{Under \texttt{set(impl\_incs}, add: \texttt{include/pcl/\$\{SUBSYS\_NAME\}/impl/organized\_edge\_detection.hpp}}
+\item{Under \texttt{set(srcs}, add: \texttt{src/organized\_edge\_detection.cpp}}
+\end{enumerate}
+\item{Apply any custom patches to the code as required.}
+\item{Return to the package root: \texttt{\$\ roscd pcl}}
+\item{Mark the package as needing to be rebuilt: \texttt{\$\ rm installed}}
+\item{Build in the changes and relink: \texttt{\$\ make}}
 \end{enumerate}
 
 \section{ROS Commands}
