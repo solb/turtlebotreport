@@ -12,6 +12,7 @@
 \def\sectionautorefname{Section}
 \usetikzlibrary{chains}
 \usetikzlibrary{scopes}
+\usetikzlibrary{shapes}
 \usetikzlibrary{positioning}
 \begin{document}
 
@@ -111,7 +112,69 @@ Toward the end of development of the gap detection algorithm, another severe pro
 In order to solve the speed issues, I turned to the work of Changhyun Choi, a Ph.D. student at Georgia Institute of Technology who was simultaneously developing a Point Cloud Library class to perform edge detection on organized point clouds.  After building the latest version of the entire library, I experimented with using his code to detect the edges of any occlusions on the floor.  At first, I used the absolute plane boundaries, but this was not ideal for two main reasons:  First, it was unable to pick up objects in the middle of the portion of the plane which we were examining.  Additionally, it was vulnerable to poor-quality floor samples far ahead, which would appear as rounded patches cutting into the distant edge of the floor plane measurably.  Consequently, I patched Choi's class to enable greater control over its high curvature edge detection, which uses the plane's normals rather than its holes, and is therefore less vulnerable to noise.  After reversing my transformation of the floor so that it was no longer being manually flattened, I tuned the edge detection and outlier removal parameters until I had successfully eliminated false positives while effectively capturing the footprints of those objects that intruded on the focal area of the ground plane.  I then instructed the robot to turn away from the centroid of the detected edge points. \\
 Unfortunately, this approach alone was unable to detect obstacles falling completely in front of the area of interest on the ground or expansive holes at any distance.  In anticipation of such situations, the total number of points falling especially close to the model of the ground plane was compared to a set threshold; if it fell under this value, the robot would back up in order to get a broader view of the obstruction.  This turned out to be a poor way to handle the situation, however, as the number of ground points varied significantly depending on the type of flooring, and backing up blindly often resulted in crashing into some unknown obstruction.  As such, absolute plane boundaries were merged back in, this time in addition to curvature detection, and with the added restriction of expected border regions for the former.  Now, if the edge of the ground moved toward where its center was expected to be, it was assumed that there was either a hole encroaching upon the robot's position or an object between the Kinect and its nearest view of the ground, and the detected edge points were pooled with the curvature keypoints in order to determine which direction to turn. \\
 Together, the curvature points and outstanding plane boundary points were able to keep the Kinect from getting close enough to most obstacles to become completely blind.  However, to further ensure the robot's safety, a third check was added:  As the robot drove forward or turned, it constantly remembered the direction in which it would have turned---whether or not it was actually doing so---given the data from the previous frame.  In the case where no ground points were visible, and thus something was completely obscuring the Kinect's view, it would then begin to turn in the stored direction.  This step proved effective against high-speed situations where the processing delay brought obstructions out of the robot's view before it had yet evaluated them, as well as situations where a large obstruction was suddenly placed very close to the robot's front. \\
-The complete progression of development is summarized in \autoref{fig:progression}.
+The complete progression of development is summarized in \autoref{fig:progression}.  Additionally, the control flow of the final project is discussed in \autoref{fig:runtime}. \\
+\begin{figure}
+\begin{tikzpicture}[formatting/.style={font=\scriptsize,execute at begin node={\begin{varwidth}{5cm}\begin{center}},execute at end node={\end{center}\end{varwidth}}}, every node/.style={draw,on chain,formatting}, every on chain/.style=join, every join/.style=->, node distance=12pt]
+{ [start chain=going below]
+	\node[shape=ellipse]{Has the user changed the parameters for the floor points?};
+	{ [start branch=planechanged going below]
+		\node[xshift=-3cm]{Recompute the ground plane model};
+		{ [every node/.style=formatting]
+			\path(chain-end) edge node[left]{yes} (chain/planechanged-end);
+		}
+	}
+	\node[join=with chain/planechanged-end,xshift=3cm]{Crop out everything except the region containing the floor};
+	{ [every node/.style=formatting]
+		\path(\tikzchainprevious) edge node[right]{no} (chain-end);
+	}
+	\node{Use the linear ground plane model to remove all points above a certain distance away from the floor and count the number of actual floor points};
+	\node[shape=ellipse]{Did we find any floor points?};
+	{ [start branch=floorvisible going below]
+		\node[xshift=-6cm,yshift=3cm]{Estimate edge points based on curvature and absolute plane boundaries};
+		{ [every node/.style=formatting]
+			\path(chain-end) edge node[below]{yes} (chain/floorvisible-end);
+		}
+		\node{Remove absolute plane boundary points falling within the regions of the expected borders};
+		\node{Detect and remove outliers based on neighbor radii};
+		\node[shape=ellipse]{Were any edge points detected and left unfiltered?};
+		{ [start branch=edgepoints going right]
+			\node{Calculate and turn away from the centroid of all the edge points};
+			{ [every node/.style=formatting]
+				\path(chain/floorvisible-end) edge node[above]{yes} (chain/floorvisible/edgepoints-end);
+			}
+			\draw[->](chain/floorvisible/edgepoints-end) .. controls (8cm,-8cm) and (8cm,0) .. (chain-1);
+		}
+		\node{Choose and remember for later the turning direction of the side with \textit{more} floor points};
+		{ [every node/.style=formatting]
+			\path(\tikzchainprevious) edge node[right]{no} (chain/floorvisible-end);
+		}
+		\node[on chain=going right]{Drive straight forward};
+		\draw[->](chain/floorvisible-end) .. controls (8cm,-10cm) and (8cm,0) .. (chain-1);
+	}
+	\node{Turn in the direction chosen on the previous iteration};
+	{ [every node/.style=formatting]
+		\path(\tikzchainprevious) edge node[left]{no} (chain-end);
+	}
+	\draw[->](chain-end) .. controls (8cm,-6cm) and (8cm,0) .. (chain-1);
+}
+{ [start chain=drive going right]
+	\node[shape=ellipse,xshift=-3cm,yshift=-11cm]{Has the user enabled movement?};
+	{ [start branch=gosomewhere going right]
+		\node{Send the navigation commands calculated in the main thread};
+		{ [every node/.style=formatting]
+			\path(drive-end) edge node[above]{yes} (drive/gosomewhere-end);
+		}
+		\draw[->](drive/gosomewhere-end) .. controls (0,-12cm) .. (drive-1);
+	}
+	\draw[->](drive-end) .. controls (-2.5cm,-12cm) and (-3.5cm,-12cm) .. (drive-1);
+}
+{ [every node/.style=formatting]
+	\node[xshift=-3cm,yshift=-11.65cm]{no};
+}
+\end{tikzpicture}
+\caption{The final program's flow of control}
+\label{fig:runtime}
+\end{figure}
 
 \section{Results and Discussion}
 TODO
