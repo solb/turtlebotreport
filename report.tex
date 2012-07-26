@@ -70,7 +70,8 @@ Any robot that is to drive autonomously must be able to detect and avoid obstacl
 The Point Cloud Library includes many data types and numerous algorithms that make working with point clouds extraordinarily easy.  The first algorithm used in this research was the 3-D voxel grid filter, which downsamples point cloud data by modeling the input dataset with a three-dimensional grid having cubic cells of a user-supplied width.  Each cell that contained points in the original set is then filled with a single point placed at the centroid of the points within that part of the input (\hyperref[bib:rusu]{Rusu, 2011}). \\
 The research also made use of the plane edge detection algorithms simultaneously developed by Changhyun Choi.  One of the utilized algorithms simply finds points bordering on those whose coordinates are set to NaN values, thereby computing the absolute boundaries of a plane.  Particularly useful was his high curvature edge detection algorithm, which locates the points making up the boundaries between the floor and those objects that rest on it using integral images and Canny edge detection (\hyperref[bib:choi]{Choi, 2012}). \\
 Integral images are a common technique in modern computer vision, and are used to detect distinctive image features.  They are essentially tables storing for each coordinate in the corresponding image the sum of the pixel values lying in the box bounded by that coordinate and the upper-left corner of the image.  Features from an integral image can then be used for a wide variety of purposes, including estimation of a 3-D image's surface normals (\hyperref[bib:viola]{Viola, 2001}). \\
-The Canny edge detector starts by smoothing the input image to reduce noise.  Next, the spacial gradients of the resulting image are measured in order to expose the edges, each of which is assigned a strength based on the distinctiveness of its gradient.  The directions of the edges are determined using the gradients in two dimensions, then they are used to trace the edges.  Those edges with strengths above a certain threshold are kept, while those with strengths between that value and another constant are kept only if they are connected to one or more edges from the former group \hyperref[bib:canny]{Canny, 1986}).
+The Canny edge detector starts by smoothing the input image to reduce noise.  Next, the spacial gradients of the resulting image are measured in order to expose the edges, each of which is assigned a strength based on the distinctiveness of its gradient.  The directions of the edges are determined using the gradients in two dimensions, then they are used to trace the edges.  Those edges with strengths above a certain threshold are kept, while those with strengths between that value and another constant are kept only if they are connected to one or more edges from the former group (\hyperref[bib:canny]{Canny, 1986}). \\
+PCL also provides a radius outlier removal, which accepts from the user a search radius and a minimum number of neighbors.  It then searches the neighborhood surrounding each point in the image and removes that point if it has fewer than the specified number of neighbors (\hyperref[bib:oleary]{O'Leary, 2011}).
 
 \section{Approach}
 \begin{figure}
@@ -178,6 +179,63 @@ The complete progression of development is summarized in \autoref{fig:progressio
 \caption{The final program's flow of control}
 \label{fig:runtime}
 \end{figure}
+\begin{table}
+\caption{Test cases to which the implementation was subjected}
+\label{tab:tests}
+\begin{tabular}{| p{\textwidth} |}
+\hline
+\textbf{Test Case} \\
+\hline\hline
+Initial implementation encounters an obstacle \\
+%outcome oscillation
+%solution commit to direction
+%implication spinning (and drifting) while trapped
+\hline
+Encounters a tall, thin obstacle \\
+%outcome invisible
+%solution average samples instead of using noise threshold
+\hline
+Encounters an object that falls entirely within the center region but decidedly to one side \\
+%outcome may turn toward
+%solution extend peripheral regions to encompass their halves of the center
+\hline
+%debating whether to include other changes to cropping/direction choice
+%omitting dealings with object segmentation and distance measurement
+Encounters a very short but well-defined object on the ground \\
+%outcome invisible
+%solution examine the occlusions on the ground instead of cropping the height range
+%implication suspended objects (including benches and vending machines) disappear
+\hline
+Initial floor implementation encounters a hole (such as a staircase) \\
+%outcome invisible
+%solution counted ground points and compared to a safety threshold
+%implication trouble with different types of flooring
+\hline
+Encounters an object closer than the visible floor region \\
+%outcome invisible
+%solution use absolute plane boundaries and bumper regions instead of floor points count
+%implication better tolerance of differing surfaces
+%debating whether to include the bug affecting floor gone bumpers
+\hline
+Comes extremely close to a large object or precipice \\
+%outcome continues
+%solution ensure the ground is still visible, or else turn in a remembered direction
+%implication alleviates processing time issues
+\hline
+Encounters a suspended object (bench or vending machine) \\
+%outcome invisible
+%todo merge in downsampled height region check
+\hline
+Encounters a patch of sunlight \\
+%outcome avoids
+%idea color data
+\hline
+Encounters a glass or otherwise transparent wall \\
+%outcome invisible
+%idea color data
+\hline
+\end{tabular}
+\end{table}
 
 \section{Results and Discussion}
 TODO
@@ -213,6 +271,9 @@ Koren, Y. and Borenstein, J. (1991). Potential field methods and their inherent 
 \label{bib:nguyen}
 Nguyen, Van-Duc. (2012). Obstacle avoidance using the Kinect. June 15, 2012 $\langle$\url{http://scribd.com/doc/80464002/Obstacle-Avoidance-Using-the-Kinect}$\rangle$.
 \end{sloppypar}
+\phantomsection
+\label{bib:oleary}
+O'Leary, Gabe. (2011). Removing Outliers Using a Conditional or RadiusOutler Removal. Point Cloud Library Tutorials. July 26, 2012. $\langle$\url{http://pointclouds.org/documentation/tutorials/remove_outliers.php}$\rangle$. \\
 \phantomsection
 \label{bib:rusu}
 Rusu, Radu B. (2011). Downsampling a PointCloud using a VoxelGrid filter. Point Cloud Library Tutorials. July 26, 2012. $\langle$\url{http://pointclouds.org/documentation/tutorials/voxel_grid.php}$\rangle$. \\
