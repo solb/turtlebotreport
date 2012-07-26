@@ -45,6 +45,7 @@ cpp
 deleteParam
 dev
 downsample
+downsamples
 downsampling
 dropdown
 edu
@@ -84,6 +85,7 @@ overlay's
 pcl
 pdf
 pointclouds
+prepopulated
 ps
 rit
 ros

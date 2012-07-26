@@ -55,7 +55,7 @@ TODO
 \newpage
 
 \section{Introduction}
-TODO
+Any robot that is to drive autonomously must be able to detect and avoid obstacles that it might encounter.  Traditionally, this problem has been solved using systems of one or more RGB cameras utilizing complicated and computationally-expensive computer vision algorithms, somewhat unreliable ultrasonic distance sensors, or laser-based depth scanners.  However, Microsoft's recent release of the XBox Kinect has opened up new areas of research in the areas of computer vision and image understanding.  The three-dimensional point cloud provided by the low-cost and comercially-available Kinect platform puts much more information about the surrounding world at the disposal of an autonomous robot.  This research investigates the problem of using the Kinect's RGB-D point cloud to autonomously detect and avoid obstacles in an unconstrained indoor environment.  The TurtleBot hardware platform by Willow Garage is employed, backed by the ROS robotics suite and the Open Perception Foundation's Point Cloud Library.
 
 \section{Similar Work (Literature Review)}
 \begin{itemize}
@@ -67,7 +67,8 @@ TODO
 \end{itemize}
 
 \section{Background}
-TODO
+The Point Cloud Library includes many data types and numerous algorithms that make working with point clouds extraordinarily easy.  The first algorithm used in this research was the 3-D voxel grid filter, which downsamples point cloud data by modeling the input dataset with a three-dimensional grid having cubic cells of a user-supplied width.  Each cell that contained points in the original set is then filled with a single point placed at the centroid of the points within that part of the input (\hyperref[bib:rusu]{Rusu}). \\
+The library also provides a Euclidean cluster detection routine, which is able to identify individual objects within a particular cloud.  Using a searchable representation of the input cloud, the algorithm starts with the first point and creates a processing queue that is prepopulated with the set of neighbors falling within a sphere of set radius.  Each of these points is then processed---if it has not already been---in the same manner until the entire queue has been processed; at this point, all the points that have been processed are added to a structure representing the first cluster.  The algorithm continues with the next unprocessed cloud point, and repeats until it has processed all the points in the cloud (\hyperref[bib:tuerker]{Tuerker}).
 
 \section{Approach}
 \begin{figure}
@@ -192,10 +193,10 @@ TODO
 \linebreak
 \phantomsection
 \label{bib:herrera}
-Herrera, Daniel C. \textit{et al.} (2011). Accurate and practical calibration of a depth and color camera pair. In \textit{Computer Vision, Image Analysis, and Processing (CAIP 2011).} June 8, 2012. $\langle$\url{http://www.ee.oulu.fi/~dherrera/papers/2011-depth_calibration.pdf}$\rangle$.\\
+Herrera, Daniel \textit{et al.} (2011). Accurate and practical calibration of a depth and color camera pair. In \textit{Computer Vision, Image Analysis, and Processing (CAIP 2011).} June 8, 2012. $\langle$\url{http://www.ee.oulu.fi/~dherrera/papers/2011-depth_calibration.pdf}$\rangle$. \\
 \phantomsection
 \label{bib:holz}
-Holz, Dirk \textit{et al.} (2011). Real-time plane segmentation using RGB-D cameras. In \textit{Proceedings of the 15\textsuperscript{th} RoboCup International Symposium,} Istanbul, July 2011. June 11, 2012. $\langle$\url{ais.uni-bonn.de/papers/robocup2011_holz.pdf}$\rangle$.\\
+Holz, Dirk \textit{et al.} (2011). Real-time plane segmentation using RGB-D cameras. In \textit{Proceedings of the 15\textsuperscript{th} RoboCup International Symposium,} Istanbul, July 2011. June 11, 2012. $\langle$\url{ais.uni-bonn.de/papers/robocup2011_holz.pdf}$\rangle$. \\
 \phantomsection
 \label{bib:koren}
 Koren, Y. and Borenstein, J. (1991). Potential field methods and their inherent limitations for mobile robot navigation. In \textit{Proceedings of the IEEE Conference on Robotics and Automation,} Sacramento, April 7-12, 1991, 1398-1404. June 8, 2012. $\langle$\url{http://www-personal.umich.edu/~johannb/Papers/paper27.pdf}$\rangle$.
@@ -205,8 +206,16 @@ Koren, Y. and Borenstein, J. (1991). Potential field methods and their inherent 
 Nguyen, Van-Duc. (2012). Obstacle avoidance using the Kinect. June 15, 2012 $\langle$\url{http://scribd.com/doc/80464002/Obstacle-Avoidance-Using-the-Kinect}$\rangle$.
 \end{sloppypar}
 \phantomsection
+\label{bib:rusu}
+Rusu, Radu B. (2011). Downsampling a PointCloud using a VoxelGrid filter. Point Cloud Library Tutorials. July 26, 2012. $\langle$\url{http://pointclouds.org/documentation/tutorials/voxel_grid.php}$\rangle$. \\
+\phantomsection
 \label{bib:talukder}
 Talukder, A. \textit{et al.} (2002). Fast and reliable obstacle detection and segmentation for cross-country navigation. In \textit{Proceedings of the IEEE Intelligent Vehicle Symposium (IVS 02),} 610-618. June 25, 2012. $\langle$\url{http://users.soe.ucsc.edu/~manduchi/papers/IV02.pdf}$\rangle$.
+\begin{sloppypar}
+\phantomsection
+\label{bib:tuerker}
+Tuerker, Serkan. (2011). Euclidean Cluster Extraction. Point Cloud Library Tutorials. July 26, 2012. $\langle$\url{http://pointclouds.org/documentation/tutorials/cluster_extraction.php}$\rangle$.
+\end{sloppypar}
 
 \clearpage
 {\Large Appendices} \\
