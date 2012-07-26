@@ -67,8 +67,10 @@ Any robot that is to drive autonomously must be able to detect and avoid obstacl
 \end{itemize}
 
 \section{Background}
-The Point Cloud Library includes many data types and numerous algorithms that make working with point clouds extraordinarily easy.  The first algorithm used in this research was the 3-D voxel grid filter, which downsamples point cloud data by modeling the input dataset with a three-dimensional grid having cubic cells of a user-supplied width.  Each cell that contained points in the original set is then filled with a single point placed at the centroid of the points within that part of the input (\hyperref[bib:rusu]{Rusu}). \\
-The library also provides a Euclidean cluster detection routine, which is able to identify individual objects within a particular cloud.  Using a searchable representation of the input cloud, the algorithm starts with the first point and creates a processing queue that is prepopulated with the set of neighbors falling within a sphere of set radius.  Each of these points is then processed---if it has not already been---in the same manner until the entire queue has been processed; at this point, all the points that have been processed are added to a structure representing the first cluster.  The algorithm continues with the next unprocessed cloud point, and repeats until it has processed all the points in the cloud (\hyperref[bib:tuerker]{Tuerker}).
+The Point Cloud Library includes many data types and numerous algorithms that make working with point clouds extraordinarily easy.  The first algorithm used in this research was the 3-D voxel grid filter, which downsamples point cloud data by modeling the input dataset with a three-dimensional grid having cubic cells of a user-supplied width.  Each cell that contained points in the original set is then filled with a single point placed at the centroid of the points within that part of the input (\hyperref[bib:rusu]{Rusu, 2011}). \\
+The research also made use of the plane edge detection algorithms simultaneously developed by Changhyun Choi.  One of the utilized algorithms simply finds points bordering on those whose coordinates are set to NaN values, thereby computing the absolute boundaries of a plane.  Particularly useful was his high curvature edge detection algorithm, which locates the points making up the boundaries between the floor and those objects that rest on it using integral images and Canny edge detection (\hyperref[bib:choi]{Choi, 2012}). \\
+Integral images are a common technique in modern computer vision, and are used to detect distinctive image features.  They are essentially tables storing for each coordinate in the corresponding image the sum of the pixel values lying in the box bounded by that coordinate and the upper-left corner of the image.  Features from an integral image can then be used for a wide variety of purposes, including estimation of a 3-D image's surface normals (\hyperref[bib:viola]{Viola, 2001}). \\
+The Canny edge detector starts by smoothing the input image to reduce noise.  Next, the spacial gradients of the resulting image are measured in order to expose the edges, each of which is assigned a strength based on the distinctiveness of its gradient.  The directions of the edges are determined using the gradients in two dimensions, then they are used to trace the edges.  Those edges with strengths above a certain threshold are kept, while those with strengths between that value and another constant are kept only if they are connected to one or more edges from the former group \hyperref[bib:canny]{Canny, 1986}).
 
 \section{Approach}
 \begin{figure}
@@ -192,6 +194,12 @@ TODO
 {\large References} \\
 \linebreak
 \phantomsection
+\label{bib:canny}
+Canny, John. (1986). A computational approach to edge detection. In \textit{IEEE Transactions on Pattern Analysis and Machine Intelligence (PAMI),} Vol. 8, no. 6, November 1986. July 26, 2012. $\langle$\url{http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=4767851}$\rangle$. \\
+\phantomsection
+\label{bib:choi}
+Choi, Changhyun. (2012). Organized Edge Detection. PCL Google Summer of Code Developers Blog. July 26, 2012. $\langle$\url{http://pointclouds.org/blog/gsoc12/cchoi} \\
+\phantomsection
 \label{bib:herrera}
 Herrera, Daniel \textit{et al.} (2011). Accurate and practical calibration of a depth and color camera pair. In \textit{Computer Vision, Image Analysis, and Processing (CAIP 2011).} June 8, 2012. $\langle$\url{http://www.ee.oulu.fi/~dherrera/papers/2011-depth_calibration.pdf}$\rangle$. \\
 \phantomsection
@@ -210,12 +218,10 @@ Nguyen, Van-Duc. (2012). Obstacle avoidance using the Kinect. June 15, 2012 $\la
 Rusu, Radu B. (2011). Downsampling a PointCloud using a VoxelGrid filter. Point Cloud Library Tutorials. July 26, 2012. $\langle$\url{http://pointclouds.org/documentation/tutorials/voxel_grid.php}$\rangle$. \\
 \phantomsection
 \label{bib:talukder}
-Talukder, A. \textit{et al.} (2002). Fast and reliable obstacle detection and segmentation for cross-country navigation. In \textit{Proceedings of the IEEE Intelligent Vehicle Symposium (IVS 02),} 610-618. June 25, 2012. $\langle$\url{http://users.soe.ucsc.edu/~manduchi/papers/IV02.pdf}$\rangle$.
-\begin{sloppypar}
+Talukder, A. \textit{et al.} (2002). Fast and reliable obstacle detection and segmentation for cross-country navigation. In \textit{Proceedings of the IEEE Intelligent Vehicle Symposium (IVS 02),} 610-618. June 25, 2012. $\langle$\url{http://users.soe.ucsc.edu/~manduchi/papers/IV02.pdf}$\rangle$. \\
 \phantomsection
-\label{bib:tuerker}
-Tuerker, Serkan. (2011). Euclidean Cluster Extraction. Point Cloud Library Tutorials. July 26, 2012. $\langle$\url{http://pointclouds.org/documentation/tutorials/cluster_extraction.php}$\rangle$.
-\end{sloppypar}
+\label{bib:viola}
+Viola, Paul and Jones, Michael. (2001). Robost real-time object detection. In \textit{Second International Workshop on Statistical and Computational Theories of Vision (IJCV 2001),} Vancouver, July 13, 2001. July 26, 2012. $\langle$\url{http://research.microsoft.com/~viola/Pubs/Detect/violaJones_IJCV.pdf}$\rangle$.
 
 \clearpage
 {\Large Appendices} \\
