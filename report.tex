@@ -198,10 +198,12 @@ Herrera, Daniel C. \textit{et al.} (2011). Accurate and practical calibration of
 Holz, Dirk \textit{et al.} (2011). Real-time plane segmentation using RGB-D cameras. In \textit{Proceedings of the 15\textsuperscript{th} RoboCup International Symposium,} Istanbul, July 2011. June 11, 2012. $\langle$\url{ais.uni-bonn.de/papers/robocup2011_holz.pdf}$\rangle$.\\
 \phantomsection
 \label{bib:koren}
-Koren, Y. and Borenstein, J. (1991). Potential field methods and their inherent limitations for mobile robot navigation. In \textit{Proceedings of the IEEE Conference on Robotics and Automation,} Sacramento, April 7-12, 1991, 1398-1404. June 8, 2012. $\langle$\url{http://www-personal.umich.edu/~johannb/Papers/paper27.pdf}$\rangle$.\\
+Koren, Y. and Borenstein, J. (1991). Potential field methods and their inherent limitations for mobile robot navigation. In \textit{Proceedings of the IEEE Conference on Robotics and Automation,} Sacramento, April 7-12, 1991, 1398-1404. June 8, 2012. $\langle$\url{http://www-personal.umich.edu/~johannb/Papers/paper27.pdf}$\rangle$.
+\begin{sloppypar}
 \phantomsection
 \label{bib:nguyen}
 Nguyen, Van-Duc. (2012). Obstacle avoidance using the Kinect. June 15, 2012 $\langle$\url{http://scribd.com/doc/80464002/Obstacle-Avoidance-Using-the-Kinect}$\rangle$.
+\end{sloppypar}
 \phantomsection
 \label{bib:talukder}
 Talukder, A. \textit{et al.} (2002). Fast and reliable obstacle detection and segmentation for cross-country navigation. In \textit{Proceedings of the IEEE Intelligent Vehicle Symposium (IVS 02),} 610-618. June 25, 2012. $\langle$\url{http://users.soe.ucsc.edu/~manduchi/papers/IV02.pdf}$\rangle$.
@@ -210,6 +212,7 @@ Talukder, A. \textit{et al.} (2002). Fast and reliable obstacle detection and se
 {\Large Appendices} \\
 \appendix
 \section{Starting the TurtleBot}
+\begin{sloppypar}
 \begin{enumerate}
 \item{Disconnect both chargers from the robot, if applicable.}
 \item{Turn on the iRobot Create by pressing the power button on its back; the power light should turn green.}
@@ -224,38 +227,45 @@ Talukder, A. \textit{et al.} (2002). Fast and reliable obstacle detection and se
 \item{Enter the following command to enable the Interactive tab in RViz: \texttt{\$\ nohup rosrun turtlebot\_interactive\_markers turtlebot\_marker\_server \&}}
 \item{You may now safely close your robot shell connection: \texttt{\$\ exit}}
 \end{enumerate}
+\end{sloppypar}
 
 \section{Stopping the TurtleBot}
+\begin{sloppypar}
 \begin{enumerate}
 \item{Connect to the robot.}
 \item{Stop the Interactive Markers server: \texttt{\$\ kill `ps -ef | grep marker\_server | tr -s " " | cut -d " " -f 2`}}
 \item{Stop the Kinect with: \texttt{\$\ kill `ps -ef | grep kinect.launch | grep -v grep | tr -s " " | cut -d " " -f 2`}}
-\item{Release the iRobot Create with: \texttt{\$\ rosservice call \\ /turtlebot\_node/set\_operation\_mode 1}}
+\item{Release the iRobot Create with: \texttt{\$\ rosservice call /turtlebot\_node/set\_operation\_mode 1}}
 \item{At this point, it is safe to plug the charger into the iRobot Create.  If you want to turn of the laptop as well, continue with the below steps instead.}
 \item{Shut down the robot laptop: \texttt{\$\ sudo halt}}
 \item{Turn off the Create by pressing its power button.}
 \item{Plug in the chargers for the iRobot Create and the laptop.}
 \end{enumerate}
+\end{sloppypar}
 
 \section{Setting up a Development Workstation}
+\begin{sloppypar}
 \begin{enumerate}
 \item{Ready a machine for your use.  (We'll assume you're using Ubuntu 10.04 through 11.10.)}
 \item{Ensure that your system has either a hostname or a static IP that is visible from the robot.}
-\item{Download the ROS package signing key: \texttt{\$\ wget \\ http://packages.ros.org/ros.key}}
+\item{Download the ROS package signing key: \texttt{\$\ wget http://packages.ros.org/ros.key}}
 \item{Add the signing key to your system: \texttt{\$\ sudo apt-key add ros.key}}
 \item{Add the ROS repository to your system: \texttt{\$\ sudo apt-add-repository http://packages.ros.org/ros/ubuntu}}
 \item{Update your repository cache: \texttt{\$\ sudo apt-get update}}
-\item{Install the TurtleBot desktop suite: \texttt{\$\ sudo apt-get install \\ ros-electric-turtlebot-desktop}}
+\item{Install the TurtleBot desktop suite: \texttt{\$\ sudo apt-get install ros-electric-turtlebot-desktop}}
 \item{Edit your bash configuration(\texttt{\$\ \$EDITOR \~{}/.bashrc}), adding the following lines to the end:}
-\begin{alltt}\begin{itemize}
+\begin{alltt}
+\begin{itemize}
+\item{}
 \item{source /opt/ros/electric/setup.bash}
 \item{export ROS\_MASTER\_URI=http://turtlebot.rit.edu:11311}
-\item{export ROS\_PACKAGE\_PATH= \\ <directory where you'll store your source code>:\$ROS\_PACKAGE\_PATH}
-\end{itemize}\end{alltt}
+\item{export ROS\_PACKAGE\_PATH=<directory\- where\- you'll\- store\- your\- source\- code>:\$ROS\_PACKAGE\_PATH}
+\end{itemize}
+\end{alltt}
 \item{Write and close the file, then enter the following command in each of your open terminals: \texttt{\$\ source \~{}/.bashrc}}
 \item{Install the Chrony NTP daemon: \texttt{\$\ sudo apt-get install chrony}}
 \item{Synchronize the clock: \texttt{\$\ sudo ntpdate ntp.rit.edu}}
-\item{If the robot and the workstation both have hostnames, but they are in different domains, perform the following steps.  (In this example, the robot is at turtlebot.rit.edu and the workstation is at turtlecmd.wireless.rit.edu.)}
+\item{If the robot and the workstation both have hostnames, but they are in different domains, perform the following steps.  (In this example, the robot is at \texttt{turtlebot.rit.edu} and the workstation is at \texttt{turtlecmd.wireless.rit.edu}.)}
 \begin{enumerate}
 \item{On each machine, right-click the Network Manager applet in the notification area, choose \textit{Edit Connections...}, and open the properties for the specific connection that is being used.}
 \item{On the IPv4 Settings tab, change the \textit{Method} dropdown to \texttt{Automatic (DHCP) address only.}}
@@ -271,10 +281,12 @@ Talukder, A. \textit{et al.} (2002). Fast and reliable obstacle detection and se
 \item{Save the file and quit, and the changes should take effect immediately and automatically.}
 \end{enumerate}
 \end{enumerate}
+\end{sloppypar}
 
 \section{Upgrading to the Latest Version of PCL}
 \label{apx:upgrade}
 The version of the Point Cloud Library shipped with ROS lags significantly behind that available directly from the community.  These instructions show how to install the latest version of PCL on top of an existing ROS Electric installation.
+\begin{sloppypar}
 \begin{enumerate}
 \item{Create a folder to contain the build files and the replacement copy of the perception\_pcl stack: \texttt{\$\ mkdir \~{}/ros}}
 \item{Install the Python package management utilities: \texttt{\$\ sudo apt-get install python-setuptools}}
@@ -300,9 +312,11 @@ The version of the Point Cloud Library shipped with ROS lags significantly behin
 \item{Edit your bashrc file to add the following line before the line that sets your \texttt{ROS\_PACKAGE\_PATH}: \texttt{source \~{}/ros/setup.bash}}
 \item{If you intend on continuing to use your current terminals, enter the following in each after saving the file: \texttt{\$\ source ~{}/.bashrc}}
 \end{enumerate}
+\end{sloppypar}
 
 \section{Backporting in a Class from the PCL Trunk}
 Often, the trunk version of the Point Cloud Library will fail to compile; therefore, it may be desirable to backport a specific class from trunk into a released copy of the library.  For instance, the code written for this project relies on the OrganizedEdgeDetection class, which---at the time of writing---is only available from trunk.  These steps present an example of how to backport this specific class and the new subsystem on which it relies into the 1.6.0 release of PCL.  We'll assume that the steps from \autoref{apx:upgrade} of the Appendix have already been completed.
+\begin{sloppypar}
 \begin{enumerate}
 \item{Change to the directory above your newly-compiled copy of the Point Cloud Library: \texttt{\$\ roscd pcl/..}}
 \item{Make a copy of the whole library folder: \texttt{\$\ cp -r pcl pcl.trunk}}
@@ -311,9 +325,9 @@ Often, the trunk version of the Point Cloud Library will fail to compile; theref
 \item{Clean out the directory: \texttt{\$\ make wipe}}
 \item{Re-download the latest code: \texttt{\$\ make download}}
 \item{Move back up one level in preparation for copying over the new files: \texttt{\$\ cd ..}}
-\item{Copy the header from trunk to release: \texttt{\$\ cp pcl.trunk/build/pcl\_trunk/features/include/pcl/features/organized\_edge\_detection.h pcl/build/pcl\_trunk/features/include/pcl/features}}
-\item{Copy the templated header from trunk to release: \texttt{\$\ cp pcl.trunk/build/pcl\_trunk/features/include/pcl/features/impl/organized\_edge\_detection.hpp pcl/build/pcl\_trunk/features/include/pcl/features/impl}}
-\item{Copy the source from trunk to release: \texttt{\$\ cp pcl.trunk/build/pcl\_trunk/features/src/organized\_edge\_detection.cpp pcl/build/pcl\_trunk/features/src}}
+\item{Copy the header from trunk to release: \texttt{\$\ cp pcl.trunk\slash build\slash pcl\_trunk\slash features\slash include\slash pcl\slash features\slash organized\_edge\_detection.h pcl\slash build\slash pcl\_trunk\slash features\slash include\slash pcl\slash\slash features}}
+\item{Copy the templated header from trunk to release: \texttt{\$\ cp pcl.trunk\slash build\slash pcl\_trunk\slash features\slash include\slash pcl\slash features\slash impl\slash organized\_edge\_detection.hpp pcl\slash build\slash pcl\_trunk\slash features\slash include\slash pcl\slash features\slash impl}}
+\item{Copy the source from trunk to release: \texttt{\$\ cp pcl.trunk\slash build\slash pcl\_trunk\slash features\slash src\slash organized\_edge\_detection.cpp pcl\slash build\slash pcl\_trunk\slash features\slash src}}
 \item{Copy a required new subsystem from trunk to release: \texttt{\$\ cp -r pcl.trunk/build/pcl\_trunk/2d pcl/build/pcl\_trunk}}
 \item{Move into the newly-assembled PCL build directory: \texttt{\$\ cd pcl/build/pcl\_trunk}}
 \item{Edit the \texttt{2d} package's build configuration file: \texttt{\$\ \$EDITOR 2d/CMakeLists.txt}}
@@ -324,8 +338,8 @@ Often, the trunk version of the Point Cloud Library will fail to compile; theref
 \item{Edit the \texttt{features} package's build configuration: \texttt{\$\ \$EDITOR features/CMakeLists.txt}}
 \begin{enumerate}
 \item{At the end of the SUBSYS\_DEPS list, add: \texttt{2d}}
-\item{Under \texttt{set(incs}, add: \texttt{include/pcl/\$\{SUBSYS\_NAME\}/organized\_edge\_detection.h}}
-\item{Under \texttt{set(impl\_incs}, add: \texttt{include/pcl/\$\{SUBSYS\_NAME\}/impl/organized\_edge\_detection.hpp}}
+\item{Under \texttt{set(incs}, add: \texttt{include\slash pcl\slash \$\{SUBSYS\_NAME\}\slash organized\_edge\_detection.h}}
+\item{Under \texttt{set(impl\_incs}, add: \texttt{include\slash pcl\slash \$\{SUBSYS\_NAME\}\slash impl\slash organized\_edge\_detection.hpp}}
 \item{Under \texttt{set(srcs}, add: \texttt{src/organized\_edge\_detection.cpp}}
 \end{enumerate}
 \item{Apply any custom patches to the code as required.}
@@ -333,6 +347,7 @@ Often, the trunk version of the Point Cloud Library will fail to compile; theref
 \item{Mark the package as needing to be rebuilt: \texttt{\$\ rm installed}}
 \item{Build in the changes and relink: \texttt{\$\ make}}
 \end{enumerate}
+\end{sloppypar}
 
 \section{ROS Commands}
 This section aims to list the commands needed to interface with ROS and briefly address their commonly-used arguments.  For the sake of clarity, the following conventions are used: unless otherwise noted, arguments in $\langle$angled brackets$\rangle$ are required, while those in [square brackets] are optional.
@@ -340,7 +355,9 @@ This section aims to list the commands needed to interface with ROS and briefly 
 \item{\textbf{roscore} brings up a ROS master, which is useful for experimenting with ROS on one's workstation when the TurtleBot is not online.  However, in order to actually use this master instead of the TurtleBot's, one must do the following in each pertinent shell: \texttt{\$\ export ROS\_MASTER\_URI=http://localhost:11311}}
 \item{\textbf{roscd $\langle$package$\rangle$} is a convenience script that allows one to immediately move into the root directory of the specified \textit{package}.}
 \item{\textbf{roscreate-pkg $\langle$package$\rangle$ [dependencies]} initializes package directories to contain the source code for one or more modules.  The package directory structure will be created in a new subdirectory called \textit{package} within the current folder, which must appear in \texttt{\$ROS\_PACKAGE\_PATH}.  Typically, the \textit{dependencies} should include the \texttt{roscpp} package---which contains the ROS C++ bindings---as well as any other ROS packages that will be used.  The dependencies may be modified later by editing the \texttt{manifest.xml} file in the root directory of the package to add an additional \texttt{depend} tag.  ROS nodes may be added to a project by adding a \texttt{rosbuild\_add\_executable} directive to the \texttt{CMakeLists.txt} file, also located in the package root.}
+\begin{sloppypar}
 \item{\textbf{rosmsg $\langle$verb$\rangle$ $\langle$arguments$\rangle$} shows information about currently-defined message types that may be passed over topics.  When \textit{verb} is \texttt{show} and the \textit{arguments} are \texttt{$\langle$package$\rangle$/$\langle$messagetype$\rangle$}, for instance, an "API reference" of the types and names of the variables in the message's corresponding struct hierarchy is displayed.}
+\end{sloppypar}
 \item{\textbf{rosparam $\langle$verb$\rangle$ $\langle$parameterpath$\rangle$} supports \textit{verb}s such as: \texttt{list}, \texttt{set}, \texttt{get}, and \texttt{delete}.  In the case of the former, the \textit{parameterpath} may be omitted if a complete listing is desired.  The \texttt{set} invocation expects an additional argument containing the new value to be appended.}
 \item{\textbf{rosrun $\langle$package$\rangle$ $\langle$node$\rangle$} is simply used to execute a \textit{node} once the \textit{package} has been compiled with \texttt{make}.}
 \item{\textbf{rosservice $\langle$verb$\rangle$ $\langle$servicepath$\rangle$} allows interfacing with the presently-available services over which service types may be sent.  When \textit{verb} is \texttt{list}, \textit{servicepath} may optionally be omitted, in which case all services will be shown.  With \texttt{call}, the user may call a service by passing arguments and receive a response as supported by the service type.  The \texttt{type} \textit{verb} is important, as it returns the package and service type corresponding to the service at the specified path.}
@@ -350,25 +367,34 @@ This section aims to list the commands needed to interface with ROS and briefly 
 
 \section{ROS Glossary}
 \begin{itemize}
+\begin{sloppypar}
 \item{\textbf{message.} A ROS communication packet that carries information between \textit{nodes} in a single direction.  New message types may be declared by creating text files in a package's \texttt{msg} directory and enabling the \texttt{rosbuild\_genmsg()} directive in its \texttt{CMakeLists.txt} file.  The composition of existing message types may be found using the \texttt{rosmsg show} command.  ROS automatically generates a C++ struct for each message type; these struct types are declared in the \texttt{$\langle$package$\rangle$/$\langle$messagetype$\rangle$.h} headers and must be included before they may be used.  Two examples of useful message types are \texttt{std\_msgs/Int32}---an \texttt{int}---and \texttt{geometry\_msgs/Twist}---used for driving the Create around.}
 \item{\textbf{node.} A single ROS executable, which may be added to a \textit{package} by appending a \texttt{rosbuild\_add\_executable} directive to the \texttt{CMakeLists.txt} file of the latter.  Once the package has been compiled using GNU Make, each of its nodes may be run using the \texttt{rosrun} command.}
+\end{sloppypar}
 \item{\textbf{package.} A "project" containing executables and/or libraries; new packages may be created with the \texttt{roscreate-pkg} command, and existing ones may be imported into a new one by adding \texttt{depend} tags to its \texttt{manifest.xml} file.  A couple of important packages are \texttt{roscpp}, which contains the \texttt{ros/ros.h} header that allows one to interface with ROS, and \texttt{pcl\_ros}, which depends on the \texttt{pcl} package to provide the Point Cloud Library bindings.}
 \item{\textbf{parameter.} A variable hosted on the ROS parameter server; it is persistent across multiple runs of a node, provided that the ROS master is not restarted.  Depending upon the node's implementation, changing one of its parameters while it is running may also affect its continued behavior.  The user interface to the parameter server is provided by the \texttt{rosparam} command, while the C++ API supports the analogous \texttt{setParam}, \texttt{getParam}, \texttt{deleteParam}, and other methods located in the \texttt{ros::NodeHandle} class.}
+\begin{sloppypar}
 \item{\textbf{service.} A link between ROS \textit{nodes} allowing two-way communication carried in the form of service types from a client to a server.  The user may call an existing service using the \texttt{rosservice} command, while C++ programs may create and call services via the \texttt{ros::ServiceServer} and \texttt{ros::ServiceClient} classes, which may be built by means of the \texttt{advertiseService} and \texttt{serviceClient} methods within \texttt{ros::NodeHandle}.  Service types---the analog of \textit{messages} from the world of \textit{topics}---may be declared in text files within a package's \texttt{srv} directory after enabling its \texttt{CMakeLists.txt} file's \texttt{rosbuild\_gensrv()} call.  Service types' components may be seen with the \texttt{rosservice show} command, and C++ service structs are generated and used similarly to those for \textit{messages}.  One example of a service used on the TurtleBot is \texttt{/turtlebot\_node/set\_operation\_mode}, which takes an integer---usually 1, 2, or 3---responds whether it is valid, and brings the iRobot Create into either Passive, Safety, or Full mode.}
-\item{\textbf{topic.} A link between ROS \textit{nodes} that allows one-way communication of information carried in the form of \textit{messages} from a publisher to a subscriber.  The user may publish or subscribe to a topic by means of the \texttt{rostopic} command, while C++ programs may do so by creating a \texttt{ros::Publisher} or \texttt{ros::Subscriber} object using the \texttt{ros::NodeHandle} class's \texttt{advertise} or \texttt{subscribe} method.  Examples of topics on the TurtleBot are \texttt{/vel\_cmd}---used to control the Create's drive and steering---and \texttt{/cloud\_throttled}---which publishes the point cloud from the Kinect.}
+\end{sloppypar}
+\item{\textbf{topic.} A link between ROS \textit{nodes} that allows one-way communication of information carried in the form of \textit{messages} from a publisher to a subscriber.  The user may publish or subscribe to a topic by means of the \texttt{rostopic} command, while C++ programs may do so by creating a \texttt{ros::Publisher} or \texttt{ros::Subscriber} object using the \texttt{ros::NodeHandle} class's \texttt{advertise} or \texttt{subscribe} method.  Examples of topics on the TurtleBot are \texttt{/cmd\_vel}---used to control the Create's drive and steering---and \texttt{/cloud\_throttled}---which publishes the point cloud from the Kinect.}
 \end{itemize}
 
 \section{Useful Links}
 Unfortunately, much of the documentation for ROS (the Robot "Operating System") is rather terse and unfriendly.  Here, I've made an effort to catalog the documentation that I found most helpful.  I've also included documentation from the website for PCL (the Point Cloud Library), which is perhaps better organized and certainly more comprehensive than that available on the ROS Wiki.
+\begin{sloppypar}
 \begin{itemize}
 \item{ROS TurtleBot wiki: \url{http://ros.org/wiki/TurtleBot}}
 \item{ROS tutorials: \url{http://ros.org/wiki/ROS/Tutorials}}
 \item{ROS C++ tutorials: \url{http://ros.org/wiki/roscpp/Tutorials}}
 \item{ROS C++ overview: \url{http://ros.org/wiki/roscpp/Overview}}
 \item{ROS C++ API reference: \url{http://ros.org/doc/electric/api/roscpp/html}}
+\item{ROS Kinect calibration tutorials: \url{http://ros.org/wiki/openni_launch/Tutorials}}
 \item{ROS PCL data type integration examples: \url{http://ros.org/wiki/pcl_ros}}
 \item{PCL tutorials: \url{http://pointclouds.org/documentation/tutorials}}
-\item{PCL API reference: \url{http://docs.pointclouds.org/1.1.0}}
+\item{PCL API reference (1.1.0): \url{http://docs.pointclouds.org/1.1.0}}
+\item{PCL API reference (1.6.0): \url{http://docs.pointclouds.org/1.6.0}}
+\item{PCL API reference (trunk): \url{http://docs.pointclouds.org/trunk}}
 \end{itemize}
+\end{sloppypar}
 
 \end{document}
