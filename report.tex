@@ -5,6 +5,7 @@
 \usepackage{alltt}
 \usepackage{hyperref}
 \usepackage[hypcap]{caption}
+\usepackage[list=true]{subcaption}
 \renewcommand{\Large}{\fontsize{18pt}{18pt}\selectfont}
 \renewcommand{\large}{\fontsize{14pt}{14pt}\selectfont}
 \sectionfont{\large}
@@ -75,7 +76,7 @@ PCL also provides a radius outlier removal, which accepts from the user a search
 
 \section{Approach}
 \begin{figure}
-\begin{tikzpicture}[start chain=going below, every node/.style={draw,on chain,font=\scriptsize}, every on chain/.style=join, every join/.style=->, node distance=12pt]
+\begin{tikzpicture}[start chain=going below, every node/.style={draw,on chain,font=\scriptsize}, every on chain/.style=join, every join/.style=->, node distance=10pt]
 \node{Applied a voxel grid downsampling};
 \node{Cropped out points outside robot's height range};
 \node{Split view into center and two peripheries};
@@ -98,11 +99,13 @@ PCL also provides a radius outlier removal, which accepts from the user a search
 	\node{Added back absolute plane boundary detection with regions in the vicinity of the expected perimeter ignored};
 	\node{Replaced backing up with turning in the direction computed from the previous frame};
 	\node{Replaced floor visibility tolerance with check for complete blindness};
+	\node{Merged in the downsampled height range algorithm, running it in a parallel thread};
 }
 \end{tikzpicture}
 \caption{The progression of code development}
 \label{fig:progression}
 \end{figure}
+
 The point cloud coming off the Kinect was extremely dense, exhibited noticeable noise, and was consequently slow to transmit, display, and process.  Thus, the first thing I did was apply a voxel grid filter to downsample the data and eradicate most of the noise while achieving better update speeds and faster processing time.  Noticing that both Holz \textit{et al.} and Nguyen used surface detection algorithms, while Koren and Borenstein simply didn't train sensors on the floor, I also decided to apply a pass-through filter to crop the y-dimension so as to discard all points falling outside the robot's height range.  This step---which was possible because I knew the robot was going to be used chiefly in indoor environments possessing smooth terrain---meant that I, too, could ignore the floor and focus on those points that represented actual obstacles.  However, it also meant sacrificing the ability to climb ramps and traverse highly uneven floors. \\
 The initial revision of my obstacle avoidance algorithm simply split the view into three parts:  The center region was used to determine whether to proceed forward or turn, the latter of which was triggered whenever the number of points in this region exceeded a set noise threshold.  Once the robot had entered a turning mode, it ceased forward motion and decided on a direction by choosing the peripheral vision field with fewer points in it.  The entire field of view was cropped in the z-dimension in order to prevent the robot from being distracted by objects well ahead of its current position. \\
 The biggest problem with this initial approach was that the robot was prone to becoming stuck oscillating in place between a left and right turn when faced with a sufficiently large obstruction.  To work around this problem, I only allowed it to choose a direction of rotation as long as it wasn't already turning.  In this way, it was forced to pick a direction whenever it first encountered an obstacle, then continue turning in that direction until it was able to drive forward again.  As a side effect, it would now rotate \textit{ad infinitum} when enclosed on all sides. \\
@@ -116,8 +119,61 @@ Toward the end of development of the gap detection algorithm, another severe pro
 In order to solve the speed issues, I turned to the work of Changhyun Choi, a Ph.D. student at Georgia Institute of Technology who was simultaneously developing a Point Cloud Library class to perform edge detection on organized point clouds.  After building the latest version of the entire library, I experimented with using his code to detect the edges of any occlusions on the floor.  At first, I used the absolute plane boundaries, but this was not ideal for two main reasons:  First, it was unable to pick up objects in the middle of the portion of the plane which we were examining.  Additionally, it was vulnerable to poor-quality floor samples far ahead, which would appear as rounded patches cutting into the distant edge of the floor plane measurably.  Consequently, I patched Choi's class to enable greater control over its high curvature edge detection, which uses the plane's normals rather than its holes, and is therefore less vulnerable to noise.  After reversing my transformation of the floor so that it was no longer being manually flattened, I tuned the edge detection and outlier removal parameters until I had successfully eliminated false positives while effectively capturing the footprints of those objects that intruded on the focal area of the ground plane.  I then instructed the robot to turn away from the centroid of the detected edge points. \\
 Unfortunately, this approach alone was unable to detect obstacles falling completely in front of the area of interest on the ground or expansive holes at any distance.  In anticipation of such situations, the total number of points falling especially close to the model of the ground plane was compared to a set threshold; if it fell under this value, the robot would back up in order to get a broader view of the obstruction.  This turned out to be a poor way to handle the situation, however, as the number of ground points varied significantly depending on the type of flooring, and backing up blindly often resulted in crashing into some unknown obstruction.  As such, absolute plane boundaries were merged back in, this time in addition to curvature detection, and with the added restriction of expected border regions for the former.  Now, if the edge of the ground moved toward where its center was expected to be, it was assumed that there was either a hole encroaching upon the robot's position or an object between the Kinect and its nearest view of the ground, and the detected edge points were pooled with the curvature keypoints in order to determine which direction to turn. \\
 Together, the curvature points and outstanding plane boundary points were able to keep the Kinect from getting close enough to most obstacles to become completely blind.  However, to further ensure the robot's safety, a third check was added:  As the robot drove forward or turned, it constantly remembered the direction in which it would have turned---whether or not it was actually doing so---given the data from the previous frame.  In the case where no ground points were visible, and thus something was completely obscuring the Kinect's view, it would then begin to turn in the stored direction.  This step proved effective against high-speed situations where the processing delay brought obstructions out of the robot's view before it had yet evaluated them, as well as situations where a large obstruction was suddenly placed very close to the robot's front. \\
+While the floor occlusion detection approach worked very well for just about everything, it had a somewhat significant disadvantage that was not shared by the earlier height range--cropping approach:  When confronted with an long, deep object having a region without floor contact---a bench or vending machine, for instance---it was unable to detect it because of its lack of interference with the floor plane.  In order to solve this shortcoming, the two approaches were combined into a single program; each was placed in a separate thread, with a third thread to integrate the steering advice of each.  This approach solved the problem of suspended objects and enabled faster response to objects detectable by the less computationally-intensive height region approach while preserving the robust detection capabilities of the surface analysis.
 The complete progression of development is summarized in \autoref{fig:progression}.  Additionally, the control flow of the final project is discussed in \autoref{fig:runtime}. \\
+
 \begin{figure}
+\begin{subfigure}{\textwidth}
+\begin{tikzpicture}[formatting/.style={font=\scriptsize,execute at begin node={\begin{varwidth}{5cm}\begin{center}},execute at end node={\end{center}\end{varwidth}}}, every node/.style={draw,on chain,formatting}, every on chain/.style=join, every join/.style=->, node distance=12pt]
+{ [start chain=going below]
+	\node{Downsample the point cloud};
+	\node{Crop out everything outside the robot's height and width regions and more than a set distance away};
+	\node[shape=ellipse]{Is the robot currently turning?};
+	{ [start branch=clearlog going right]
+		\node{Clear the backlog of prior point counts};
+		{ [every node/.style=formatting]
+			\path(chain-end) edge node[above]{yes} (chain/clearlog-end);
+		}
+	}
+	\node[join=with chain/clearlog-end]{Add the current number of visible points to the backlog};
+	{ [every node/.style=formatting]
+		\path(\tikzchainprevious) edge node[left]{no} (chain-end);
+	}
+	\node[shape=ellipse]{Is the backlog bigger than its size limit?};
+	{ [start branch=trimlog going right]
+		\node{Prune the oldest entries from the log until it is small enough};
+		{ [every node/.style=formatting]
+			\path(chain-end) edge node[above]{yes} (chain/trimlog-end);
+		}
+	}
+	\node[join=with chain/trimlog-end]{Compute the average number of points across all backlog entries};
+	{ [every node/.style=formatting]
+		\path(\tikzchainprevious) edge node[left]{no} (chain-end);
+	}
+	\node{After averaging, did we count any points in our way?};
+	{ [start branch=straighton going right]
+		\node{Calculate and turn away from the centroid of the points in the current cloud};
+		{ [every node/.style=formatting]
+			\path(chain-end) edge node[above]{yes} (chain/straighton-end);
+		}
+		\draw[->](chain/straighton-end) .. controls (12cm,-6cm) and (9cm,0) .. (chain-1);
+	}
+	\node{Drive straight forward};
+	{ [every node/.style=formatting]
+		\path(\tikzchainprevious) edge node[left]{no} (chain-end);
+	}
+	\draw[->](chain-end) .. controls (15cm,-10.5cm) and (11cm,0) .. (chain-1);
+}
+\end{tikzpicture}
+\caption{The thread performing height and width range point counting}
+\label{fig:range}
+\end{subfigure}
+\caption{The final program's flow of control (continued on \autopageref{fig:runtimecont})}
+\label{fig:runtime}
+\end{figure}
+\begin{figure}
+\ContinuedFloat
+\begin{subfigure}{\textwidth}
 \begin{tikzpicture}[formatting/.style={font=\scriptsize,execute at begin node={\begin{varwidth}{5cm}\begin{center}},execute at end node={\end{center}\end{varwidth}}}, every node/.style={draw,on chain,formatting}, every on chain/.style=join, every join/.style=->, node distance=12pt]
 { [start chain=going below]
 	\node[shape=ellipse]{Has the user changed the parameters for the floor points?};
@@ -161,24 +217,63 @@ The complete progression of development is summarized in \autoref{fig:progressio
 	}
 	\draw[->](chain-end) .. controls (8cm,-6cm) and (8cm,0) .. (chain-1);
 }
-{ [start chain=drive going right]
-	\node[shape=ellipse,xshift=-3cm,yshift=-11cm]{Has the user enabled movement?};
-	{ [start branch=gosomewhere going right]
-		\node{Send the navigation commands calculated in the main thread};
+\end{tikzpicture}
+\caption{The thread performing surface curvature, occlusion, and visibility detection}
+\label{fig:edges}
+\end{subfigure}
+\begin{subfigure}{\textwidth}
+\begin{tikzpicture}[formatting/.style={font=\scriptsize,execute at begin node={\begin{varwidth}{5cm}\begin{center}},execute at end node={\end{center}\end{varwidth}}}, every node/.style={draw,on chain,formatting}, every on chain/.style=join, every join/.style=->, node distance=12pt]
+{ [start chain=going below]
+	\node[shape=ellipse]{Do the two algorithms' advice agree?};
+	{ [start branch=atodds going right]
+		\node[shape=ellipse]{Is either one advising us to drive forward?};
 		{ [every node/.style=formatting]
-			\path(drive-end) edge node[above]{yes} (drive/gosomewhere-end);
+			\path(chain-end) edge node[above]{no} (chain/atodds-end);
 		}
-		\draw[->](drive/gosomewhere-end) .. controls (0,-12cm) .. (drive-1);
+		{ [start branch=bothturning going below]
+			\node[xshift=1cm]{\begin{varwidth}{3cm}\begin{center}Use the direction suggested by the floor analysis\end{center}\end{varwidth}};
+			{ [every node/.style=formatting]
+				\path(chain/atodds-end) edge node[right]{no} (chain/atodds/bothturning-end);
+			}
+		}
+		\node[on chain=going below,xshift=-2.5cm,yshift=0.25cm]{\begin{varwidth}{3cm}\begin{center}Take the advice telling us to turn\end{center}\end{varwidth}};
+		{ [every node/.style=formatting]
+			\path(\tikzchainprevious) edge node[left]{yes} (chain/atodds-end);
+		}
 	}
-	\draw[->](drive-end) .. controls (-2.5cm,-12cm) and (-3.5cm,-12cm) .. (drive-1);
-}
-{ [every node/.style=formatting]
-	\node[xshift=-3cm,yshift=-11.65cm]{no};
+	\node{Take their mutual recommendation};
+	{ [every node/.style=formatting]
+		\path(\tikzchainprevious) edge node[left]{yes} (chain-end);
+	}
+	\node[shape=ellipse,join=with chain/atodds-end,join=with chain/atodds/bothturning-end]{Would this be a turn direction reversal?};
+	{ [start branch=preventoscillation going right]
+		\node[yshift=-0.5cm]{Turn instead in the same direction as before};
+		{ [every node/.style=formatting]
+			\path(chain-end) edge node[below]{yes} (chain/preventoscillation-end);
+		}
+	}
+	\node[shape=ellipse,join=with chain/preventoscillation-end]{Has the user enabled robot movement?};
+	{ [every node/.style=formatting]
+		\path(\tikzchainprevious) edge node[left]{no} (chain-end);
+	}
+	{ [start branch=gosomewhere going below]
+		\node{Send the navigation commands to the drive system};
+		{ [every node/.style=formatting]
+			\path(chain-end) edge node[left]{yes} (chain/gosomewhere-end);
+		}
+	}
+	\draw[->](chain-end) .. controls (-4cm,-3cm) and (-4cm,-0.5cm).. (chain-1);
+	\draw[->](chain/gosomewhere-end) .. controls (-4cm,-4cm) and (-4cm,-0.5cm) .. (chain-1);
 }
 \end{tikzpicture}
-\caption{The final program's flow of control}
-\label{fig:runtime}
+\caption{The thread integrating the decisions of the two detection threads and issuing appropriate drive commands}
+\label{fig:pilot}
+\end{subfigure}
+\captionsetup{list=false}
+\caption{The final program's flow of control \textit{(continued)}}
+\label{fig:runtimecont}
 \end{figure}
+
 \begin{table}
 \caption{Test cases to which the implementation was subjected}
 \label{tab:tests}
