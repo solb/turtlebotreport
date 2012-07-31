@@ -91,6 +91,7 @@ y=mz+y_0
 Sufficient deviation of the z-coordinate from its expected value allowed the conclusion that the point was not, in fact, part of the ground.  Another---slightly less strict---threshold was used to broaden consideration to points that were very near the ground plane, as well as those actually making it up.
 
 \section{Approach}
+\label{sec:approach}
 \begin{figure}
 \begin{tikzpicture}[start chain=going below, every node/.style={draw,on chain,font=\scriptsize}, every on chain/.style=join, every join/.style=->, node distance=10pt]
 \node{Applied a voxel grid downsampling};
@@ -297,7 +298,7 @@ The complete progression of development is summarized in \autoref{fig:progressio
 \hline
 \textbf{Test Case} \\
 \hline\hline
-Initial implementation encounters an obstacle \\
+Encounters a wide obstacle \\
 %outcome oscillation
 %solution commit to direction
 %implication spinning (and drifting) while trapped
@@ -349,7 +350,17 @@ Encounters a glass or otherwise transparent wall \\
 \end{table}
 
 \section{Results and Discussion}
-TODO
+While \autoref{sec:approach} discussed the changes that were made to the code as a result of the challenges cataloged in \autoref{tab:tests}, we will now discuss the behavior of the final implementation when faced with these same scenarios. \\
+When the final implementation encounters a wide obstacle, it is detected by both algorithms.  Additionally, the robot is not allowed to reverse the direction of its turn, so it cannot enter an oscillatory state.  A corollary to this behavior is that, if the robot is surrounded on all sides, it will continue spinning until freed. \\
+Tall, thin obstacles with a limited base footprint such as a pen are best detected by the height range algorithm.  It is only thanks to the noise reduction attained by averaging several samples that it is able to spot such small objects. \\
+In the case where an average obstacle appears in one side of the area of interest in front of the robot, it is detected by both algorithms.  Since the final revision of the cropping and downsampling approach decides directions based on the centroid of the points within the interest region, both approaches will advise turning in the same direction. \\
+Short objects resting on the floor, including markers and pads of paper, are typically invisible to the cropping algorithm.  However, the curvature of the edges where they contact the ground plane is reliably detected by the other approach. \\
+When a hole in the ground such as a descending staircase comes into view, the ground plane algorithm detects that the ground's absolute plane boundary has receded into an unexpected region.  All plane boundary points falling outside of the expected regions are treated identically to curvature points, and the direction recommendation is based on their centroid. \\
+When an object of more than trivial height comes closer to the robot than the Kinect's point cloud is able to detect, it still distorts the emitted infrared grid so as to cast a "shadow" on the ground behind it.  The plane algorithm registers that the absolute plane boundary is infringing upon the center plane region, and the situation is treated in the same manner as the case of an approaching pit. \\
+In case the robot comes close enough to an object that the Kinect's view is completely blocked, the ground plane algorithm is able to detect that it has been blinded by the complete disappearance of the floor plane.  In such a case, the robot is ordered to turn in a direction that was computed and stored when last the ground was visible. \\
+Upon approaching a suspended or apparently-suspended object such as a bench or vending machine, the plane detection algorithm sees no change in the floor plane.  The cropping method, however, is able to see that an object is infringing upon the robot's height range, and directs it to turn away from the obstruction's centroid. \\
+On the whole, the algorithms suffer from almost no problems with false positives.  However, the Kinect's infrared grid projection is masked by intense external infrared radiation.  If, for instance, the robot is approaching a patch of direct sunlight shining through a window, it will appear from the Kinect's point cloud just as though it has detected a hole in the ground, as the absolute plane boundary will begin to recede into the expected ground region.  Consequently, the robot will avoid such regions, treating them as actual danger. \\
+When face-to-face with an entirely transparent glass wall, the Kinect's infrared grid passes straight through the window.  Therefore, the barrier isn't reflected in the returned point cloud, and neither algorithm is able to see it at all.
 
 \section{Table of Hours Worked}
 TODO
