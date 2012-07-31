@@ -17,8 +17,12 @@ Kinect's
 NAT'd
 NTP
 NodeHandle
+OrganizedEdgeDetection
 PCL
 RGB
+RViz
+ServiceClient
+ServiceServer
 TurtleBot
 TurtleBot's
 UI
@@ -27,7 +31,9 @@ VTK
 Wiki
 XBox
 XZ-plane
+advertiseService
 api
+apx
 backport
 bashrc
 bringup
@@ -67,6 +73,8 @@ hpp
 html
 http
 iRobot
+impl
+incs
 keypoints
 kinect
 libvtk
@@ -106,6 +114,7 @@ rosservice
 rossvc
 rostopic
 sed
+serviceClient
 setParam
 src
 srv
