@@ -136,7 +136,7 @@ Toward the end of development of the gap detection algorithm, another severe pro
 In order to solve the speed issues, I turned to the work of Changhyun Choi, a Ph.D. student at Georgia Institute of Technology who was simultaneously developing a Point Cloud Library class to perform edge detection on organized point clouds.  After building the latest version of the entire library, I experimented with using his code to detect the edges of any occlusions on the floor.  At first, I used the absolute plane boundaries, but this was not ideal for two main reasons:  First, it was unable to pick up objects in the middle of the portion of the plane which we were examining.  Additionally, it was vulnerable to poor-quality floor samples far ahead, which would appear as rounded patches cutting into the distant edge of the floor plane measurably.  Consequently, I patched Choi's class to enable greater control over its high curvature edge detection, which uses the plane's normals rather than its holes, and is therefore less vulnerable to noise.  After reversing my transformation of the floor so that it was no longer being manually flattened, I tuned the edge detection and outlier removal parameters until I had successfully eliminated false positives while effectively capturing the footprints of those objects that intruded on the focal area of the ground plane.  I then instructed the robot to turn away from the centroid of the detected edge points. \\
 Unfortunately, this approach alone was unable to detect obstacles falling completely in front of the area of interest on the ground or expansive holes at any distance.  In anticipation of such situations, the total number of points falling especially close to the model of the ground plane was compared to a set threshold; if it fell under this value, the robot would back up in order to get a broader view of the obstruction.  This turned out to be a poor way to handle the situation, however, as the number of ground points varied significantly depending on the type of flooring, and backing up blindly often resulted in crashing into some unknown obstruction.  As such, absolute plane boundaries were merged back in, this time in addition to curvature detection, and with the added restriction of expected border regions for the former.  Now, if the edge of the ground moved toward where its center was expected to be, it was assumed that there was either a hole encroaching upon the robot's position or an object between the Kinect and its nearest view of the ground, and the detected edge points were pooled with the curvature keypoints in order to determine which direction to turn. \\
 Together, the curvature points and outstanding plane boundary points were able to keep the Kinect from getting close enough to most obstacles to become completely blind.  However, to further ensure the robot's safety, a third check was added:  As the robot drove forward or turned, it constantly remembered the direction in which it would have turned---whether or not it was actually doing so---given the data from the previous frame.  In the case where no ground points were visible, and thus something was completely obscuring the Kinect's view, it would then begin to turn in the stored direction.  This step proved effective against high-speed situations where the processing delay brought obstructions out of the robot's view before it had yet evaluated them, as well as situations where a large obstruction was suddenly placed very close to the robot's front. \\
-While the floor occlusion detection approach worked very well for just about everything, it had a somewhat significant disadvantage that was not shared by the earlier height range--cropping approach:  When confronted with an long, deep object having a region without floor contact---a bench or vending machine, for instance---it was unable to detect it because of its lack of interference with the floor plane.  In order to solve this shortcoming, the two approaches were combined into a single program; each was placed in a separate thread, with a third thread to integrate the steering advice of each.  This approach solved the problem of suspended objects and enabled faster response to objects detectable by the less computationally-intensive height region approach while preserving the robust detection capabilities of the surface analysis. \\
+While the floor occlusion detection approach worked very well for just about everything, it had a somewhat significant disadvantage that was not shared by the earlier height range--cropping approach:  When confronted with an long, deep object having a region without floor contact---a bench or vending machine, for instance---it was unable to detect it because of its lack of interference with the floor plane.  In order to solve this shortcoming, the two approaches were combined into a single program; each was placed in a separate thread, with a third thread to integrate the steering advice of each.  This approach solved the problem of suspended objects and enabled faster response to objects detectable by the less computationally-intensive height region approach while preserving the robust detection capabilities of the surface analysis.  It should be noted that, when the two algorithms were combined, the original one was modified slightly to decide the direction of the turns it recommended based on the centroid of the points in the region of interest, as opposed to an examination of the peripheral regions. \\
 The complete progression of development is summarized in \autoref{fig:progression}.  Additionally, the control flow of the final project is discussed in \autoref{fig:runtime}.
 
 \begin{figure}
@@ -299,52 +299,24 @@ The complete progression of development is summarized in \autoref{fig:progressio
 \textbf{Test Case} \\
 \hline\hline
 Encounters a wide obstacle \\
-%outcome oscillation
-%solution commit to direction
-%implication spinning (and drifting) while trapped
 \hline
 Encounters a tall, thin obstacle \\
-%outcome invisible
-%solution average samples instead of using noise threshold
 \hline
 Encounters an object that falls entirely within the center region but decidedly to one side \\
-%outcome may turn toward
-%solution extend peripheral regions to encompass their halves of the center
 \hline
-%debating whether to include other changes to cropping/direction choice
-%omitting dealings with object segmentation and distance measurement
 Encounters a very short but well-defined object on the ground \\
-%outcome invisible
-%solution examine the occlusions on the ground instead of cropping the height range
-%implication suspended objects (including benches and vending machines) disappear
 \hline
 Initial floor implementation encounters a hole (such as a staircase) \\
-%outcome invisible
-%solution counted ground points and compared to a safety threshold
-%implication trouble with different types of flooring
 \hline
 Encounters an object closer than the visible floor region \\
-%outcome invisible
-%solution use absolute plane boundaries and bumper regions instead of floor points count
-%implication better tolerance of differing surfaces
-%debating whether to include the bug affecting floor gone bumpers
 \hline
 Comes extremely close to a large object or precipice \\
-%outcome continues
-%solution ensure the ground is still visible, or else turn in a remembered direction
-%implication alleviates processing time issues
 \hline
 Encounters a suspended object (bench or vending machine) \\
-%outcome invisible
-%todo merge in downsampled height region check
 \hline
 Encounters a patch of sunlight \\
-%outcome avoids
-%idea color data
 \hline
 Encounters a glass or otherwise transparent wall \\
-%outcome invisible
-%idea color data
 \hline
 \end{tabular}
 \end{table}
@@ -363,7 +335,38 @@ On the whole, the algorithms suffer from almost no problems with false positives
 When face-to-face with an entirely transparent glass wall, the Kinect's infrared grid passes straight through the window.  Therefore, the barrier isn't reflected in the returned point cloud, and neither algorithm is able to see it at all.
 
 \section{Table of Hours Worked}
-TODO
+The time spent working on the project is addressed in \autoref{tab:hours}.
+\begin{table}
+\caption{Hours spent working on the project}
+\label{tab:hours}
+\begin{tabular}{| r | r | r | r | r | r | r |}
+\hline
+\scriptsize\textbf{Week} & \scriptsize\textbf{Research} & \scriptsize\textbf{Implementation} & \scriptsize\textbf{Testing} & \scriptsize\textbf{Documentation} & \scriptsize\textbf{Administration} & \scriptsize\textbf{Subtotal} \\
+\hline\hline
+1 & 14:00 &  &  & 6:20 & 18:00 & 38:20 \\
+\hline
+2 & 22:00 & 9:00 & 3:00 & 3:20 & 1:30 & 38:50 \\
+\hline
+3 &  & 12:00 & 4:00 & 16:00 & 12:40 & 44:40 \\
+\hline
+4 & 3:00 & 8:00 & 5:30 & 4:00 & 5:00 & 25:30 \\
+\hline
+5 & 3:00 & 13:00 & 3:00 & 10:00 & 3:00 & 32:00 \\
+\hline
+6 &  & 9:20 & 7:00 & 3:00 & 16:20 & 35:40 \\
+\hline
+7 &  & 18:00 & 8:00 & 5:00 & 14:00 & 45:00 \\
+\hline
+8 &  & 8:00 & 5:00 & 21:00 & 8:10 & 42:10 \\
+\hline
+9 &  &  &  &  &  & \\
+\hline
+10 &  &  &  &  &  & \\
+\hline\hline
+&&&&& \scriptsize\textbf{Total:} & \\
+\hline
+\end{tabular}
+\end{table}
 
 \section{Conclusion}
 TODO
