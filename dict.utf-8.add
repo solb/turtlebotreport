@@ -16,9 +16,14 @@ Kinect
 Kinect's
 NAT'd
 NTP
+NaN
 NodeHandle
 OrganizedEdgeDetection
 PCL
+PFM
+PFMs
+Ph.D. student
+RANSAC
 RGB
 RViz
 ServiceClient
@@ -27,6 +32,7 @@ TurtleBot
 TurtleBot's
 UI
 Ubuntu
+VFF
 VTK
 Wiki
 XBox
@@ -56,6 +62,7 @@ downsamples
 downsampling
 dropdown
 edu
+eq
 etc
 favorability
 flann
@@ -121,6 +128,7 @@ srv
 struct
 structs
 sudo
+teleoperation
 templated
 toc
 turtlebot
@@ -128,6 +136,7 @@ txt
 ubuntu
 usr
 vel
+voxel
 voxel
 voxels
 vtk
