@@ -61,7 +61,8 @@ The three-dimensional point cloud provided by the low-cost and commercially-avai
 \newpage
 
 \section{Introduction}
-This research was conducted on Willow Garage's TurtleBot robotics platform, shown in \autoref{fig:anatomy}.  The TurtleBot is an integrated kit backed by Willow Garage's Robot ``Operating System'' (ROS) robotics suite and the Open Perception Foundation's Point Cloud Library (the PCL), both of which are open-source projects distributed under BSD licenses.  The goal was to implement a simple but effective obstacle detection and avoidance system that---using only the data from the Kinect---was able to autonomously roam the hallways on all floors of the building without running into anything.  This task presupposed an ability to avoid whatever common hazards, whether stationary or mobile, it might reasonably be expected to encounter during such a journey.  Such capability would be desirable for potential use with or integration into future projects developed on the same system or a similar one.
+This research was conducted on Willow Garage's TurtleBot robotics platform, shown in \autoref{fig:anatomy}.  The TurtleBot is an integrated kit backed by Willow Garage's Robot ``Operating System'' (ROS) robotics suite and the Open Perception Foundation's Point Cloud Library (the PCL), both of which are open-source projects distributed under BSD licenses.  The Kinect provides depth information in the form of a three-dimensional point cloud, as shown in \autoref{fig:samplefootage}.
+The goal was to implement a simple but effective obstacle detection and avoidance system that---using only the data from the Kinect---was able to autonomously roam the hallways on all floors of the building without running into anything.  This task presupposed an ability to avoid whatever common hazards, whether stationary or mobile, it might reasonably be expected to encounter during such a journey.  Such capability would be desirable for potential use with or integration into future projects developed on the same system or a similar one.
 
 \begin{figure}[h]
 \begin{center}
@@ -81,6 +82,19 @@ This research was conducted on Willow Garage's TurtleBot robotics platform, show
 \end{center}
 \caption[TurtleBot components]{The TurtleBot and its components \\ (Image credit: \url{http://ros.org/wiki/TurtleBot})}
 \label{fig:anatomy}
+\end{figure}
+
+\begin{figure}
+\begin{subfigure}{0.525\textwidth}
+\includegraphics[width=\textwidth]{color.png}
+\caption[Color picture]{A picture from the color camera}
+\end{subfigure}
+\begin{subfigure}{0.475\textwidth}
+\includegraphics[width=\textwidth]{cloud.png}
+\caption[Point cloud]{The corresponding 3-D point cloud}
+\end{subfigure}
+\caption[Kinect imagery]{Sample imagery from the Kinect}
+\label{fig:samplefootage}
 \end{figure}
 
 \section{Similar Work (Literature Review)}
@@ -254,7 +268,6 @@ The overall process of development is covered briefly by \autoref{fig:progressio
 }
 \end{tikzpicture}
 \caption[Height range cropping]{The thread implementing the height range cropping algorithm}
-\label{fig:runtimerange}
 \end{subfigure}
 \caption[Pseudo code for algorithms]{The final program's flow of control (continued on \autopageref{fig:runtimecont})}
 \label{fig:runtime}
@@ -307,7 +320,6 @@ The overall process of development is covered briefly by \autoref{fig:progressio
 }
 \end{tikzpicture}
 \caption[Ground plane edges]{The thread implementing the ground plane edges algorithm}
-\label{fig:runtimeedges}
 \end{subfigure}
 \begin{subfigure}{\textwidth}
 \begin{tikzpicture}[formatting/.style={font=\scriptsize,execute at begin node={\begin{varwidth}{5cm}\begin{center}},execute at end node={\end{center}\end{varwidth}}}, every node/.style={draw,on chain,formatting}, every on chain/.style=join, every join/.style=->, node distance=12pt]
@@ -358,7 +370,6 @@ The overall process of development is covered briefly by \autoref{fig:progressio
 }
 \end{tikzpicture}
 \caption[Integration and drive control]{The thread integrating the decisions of the two separate algorithms and issuing appropriate drive commands}
-\label{fig:runtimepilot}
 \end{subfigure}
 \captionsetup{list=false}
 \caption{The final program's flow of control \textit{(continued)}}
