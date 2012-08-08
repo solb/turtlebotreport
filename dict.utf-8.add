@@ -1,5 +1,6 @@
 API
 Backporting
+CAIP
 CMake
 CMakeLists
 Canosa
@@ -19,6 +20,7 @@ NTP
 NaN
 NodeHandle
 OrganizedEdgeDetection
+PAMI
 PCL
 PFM
 PFMs
@@ -42,6 +44,7 @@ api
 apx
 backport
 bashrc
+blog
 bringup
 bz2
 ccmake
