@@ -94,6 +94,7 @@ mv
 nohup
 ntp
 ntpdate
+onboard
 online
 org
 outlier
