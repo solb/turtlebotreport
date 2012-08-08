@@ -7,6 +7,7 @@
 \usepackage[list=true]{subcaption}
 \usepackage{tikz}
 \usepackage{alltt}
+\usepackage{listings}
 \renewcommand{\Large}{\fontsize{18pt}{18pt}\selectfont}
 \renewcommand{\large}{\fontsize{14pt}{14pt}\selectfont}
 \sectionfont{\large}
@@ -19,6 +20,13 @@
 \usetikzlibrary{positioning}
 \usetikzlibrary{fit}
 \usetikzlibrary{decorations.pathreplacing}
+\lstset{language=C++,breaklines=true,tabsize=4,numbers=left,basicstyle=\small}
+\newcommand{\n}{\\n}
+
+\ifx\codepath\undefined
+	!USAGE: pdflatex "\def\codepath{<filename>}\input{report}"
+	\endinput
+\fi
 \begin{document}
 
 \begin{titlepage}
@@ -695,5 +703,8 @@ Unfortunately, much of the ROS documentation is rather terse and unfriendly.  He
 \item{PCL API reference (trunk): \url{http://docs.pointclouds.org/trunk}}
 \end{itemize}
 \end{sloppypar}
+
+\section{Code Listing}
+\lstinputlisting{\codepath}
 
 \end{document}
