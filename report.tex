@@ -635,21 +635,21 @@ The version of the Point Cloud Library shipped with ROS lags significantly behin
 \end{sloppypar}
 
 \section{Backporting in a Class from the PCL Trunk}
-Often, the trunk version of the Point Cloud Library will fail to compile; therefore, it may be desirable to backport a specific class from trunk into a released copy of the library.  For instance, the code written for this project relies on the OrganizedEdgeDetection class, which---at the time of writing---is only available from trunk.  These steps present an example of how to backport revision 6666 of this specific class and the new subsystem on which it relies into the 1.6.0 release of PCL.  We'll assume that the steps from \autoref{apx:upgrade} of the Appendix have already been completed.
+Often, the trunk version of the Point Cloud Library will fail to compile; therefore, it may be desirable to backport a specific class from trunk into a released copy of the library.  For instance, the code written for this project relies on the OrganizedEdgeDetection class, which---at the time of writing---is only available from trunk.  These steps present an example of how to backport revision 6467 of this specific class and the new subsystem on which it relies into the 1.6.0 release of PCL.  We'll assume that the steps from \autoref{apx:upgrade} of the Appendix have already been completed.
 \begin{sloppypar}
 \begin{enumerate}
 \item{Change to the source directory of your newly-compiled copy of the Point Cloud Library: \texttt{\$\ roscd pcl/build/pcl\_trunk}}
-\item{Download the required 2d subsystem: \texttt{\$\ svn checkout http://svn.pointclouds.org/pcl/trunk/2d@r6666}}
+\item{Download the required 2d subsystem: \texttt{\$\ svn checkout http://svn.pointclouds.org/pcl/trunk/2d@r6467}}
 \item{Move into the directory that is to contain the OrganizedEdgeDetection header: \texttt{\$\ cd features/include/pcl/features}}
-\item{Download the header: \texttt{\$\ svn export http:\slash\slash svn.pointclouds.org\slash pcl\slash trunk\slash features\slash include\slash pcl\slash features\slash organized\_edge\_detection.h@r6666}}
+\item{Download the header: \texttt{\$\ svn export http:\slash\slash svn.pointclouds.org\slash pcl\slash trunk\slash features\slash include\slash pcl\slash features\slash organized\_edge\_detection.h@r6467}}
 \item{Move into the directory that is to contain the templated code: \texttt{\$\ cd impl}}
-\item{Download the templated source: \texttt{\$\ svn export http:\slash\slash svn.pointclouds.org\slash pcl\slash trunk\slash features\slash include\slash pcl\slash features\slash impl\slash organized\_edge\_detection.hpp@r6666}}
+\item{Download the templated source: \texttt{\$\ svn export http:\slash\slash svn.pointclouds.org\slash pcl\slash trunk\slash features\slash include\slash pcl\slash features\slash impl\slash organized\_edge\_detection.hpp@r6467}}
 \item{Move into the directory that is to contain the instantiations: \texttt{\$\ cd ../../../../src}}
-\item{Download the instantiations list: \texttt{\$\ svn export http:\slash\slash svn.pointclouds.org\slash pcl\slash trunk\slash features\slash src\slash organized\_edge\_detection.cpp@r6666}}
+\item{Download the instantiations list: \texttt{\$\ svn export http:\slash\slash svn.pointclouds.org\slash pcl\slash trunk\slash features\slash src\slash organized\_edge\_detection.cpp@r6467}}
 \item{Move back into the root of the code directory: \texttt{\$\ cd ../..}}
 \item{Edit the \texttt{features} package's build configuration: \texttt{\$\ \$EDITOR features/CMakeLists.txt}}
 \begin{enumerate}
-\item{At the end of the SUBSYS\_DEPS list, add: \texttt{2d filters}}
+\item{At the end of the SUBSYS\_DEPS list, add: \texttt{2d}}
 \item{Under \texttt{set(incs}, add: \texttt{include\slash pcl\slash \$\{SUBSYS\_NAME\}\slash organized\_edge\_detection.h}}
 \item{Under \texttt{set(impl\_incs}, add: \texttt{include\slash pcl\slash \$\{SUBSYS\_NAME\}\slash impl\slash organized\_edge\_detection.hpp}}
 \item{Under \texttt{set(srcs}, add: \texttt{src/organized\_edge\_detection.cpp}}
