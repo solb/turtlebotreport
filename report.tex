@@ -395,54 +395,53 @@ A detailed visual summary of the code's progression along with the time frames o
 \caption[Structured test cases]{Test cases to which the implementation was subjected}
 \label{tab:tests}
 \begin{center}
-\begin{tabular}{| p{0.25\textwidth} | p{0.25\textwidth} | r | r |}
+\begin{tabular}{| p{0.2\textwidth} | p{0.2\textwidth} | r | r | r |}
 \hline
-\scriptsize\textbf{Scenario} & \scriptsize\textbf{Examples tested} & \scriptsize\textbf{True positives} & \scriptsize\textbf{False negatives} \\
+\scriptsize\textbf{Scenario} & \scriptsize\textbf{Examples tested} & \scriptsize\textbf{True positives} & \scriptsize\textbf{False negatives} & \scriptsize\textbf{\% correct} \\
 \hline\hline
-\scriptsize Wide obstacle & \scriptsize Wall, recycle bin, round trashcan &  &  \\
+\scriptsize Wide obstacle & \scriptsize Wall, recycle bin, round trashcan & 55 & 0 & 100\textsuperscript{\%} \\
 \hline
-\scriptsize Tall, thin obstacle & \scriptsize Chair leg, table leg & 36 & 0 \\
+\scriptsize Tall, thin obstacle & \scriptsize Chair leg, table leg & 36 & 0 & 100\textsuperscript{\%} \\
 \hline
-\scriptsize Short object on the ground & \scriptsize Pad of paper, marker, console cable &  &  \\
+\scriptsize Short object on the ground & \scriptsize Pad of paper, marker, serial console cable & 29 & 25 & 54\textsuperscript{\%} \\
 \hline
-\scriptsize Hole in the ground & \scriptsize Staircase & 18 & 0 \\
+\scriptsize Hole in the ground & \scriptsize Staircase & 18 & 0 & 100\textsuperscript{\%} \\
 \hline
-\scriptsize Suspended object & \scriptsize Vending machine, bench &  &  \\
-\hline
-\scriptsize Patch of light & \scriptsize Sunlight &  &  \\
-\hline
-\scriptsize Transparent wall & \scriptsize Glass &  &  \\
+\scriptsize Suspended object & \scriptsize Vending machine & 18 & 0 & 100\textsuperscript{\%} \\
+\hline\hline
+& \scriptsize\textbf{Overall}: & 156 & 25 & 86\textsuperscript{\%} \\
 \hline
 \end{tabular}
 \end{center}
 \end{table}
 
-While \autoref{sec:approach} discussed the changes that were made to the code as a result of the challenges cataloged in \autoref{tab:tests}, we will now discuss the behavior of the final implementation when faced with these same scenarios.  In order to quantify the system's success rate, intensive testing of these cases was performed:  For each row of \autoref{tab:tests}, the specific cases given in the second column were tested at three different distances.  First, each object was tested at long range as it came into view; it would be placed ahead of the robot's area of interest so that the robot would encounter it as it approached.  Next, the object was placed at medium distance away, within the area of interest, before the algorithm was started.  Finally, it was placed extremely close to the robot so that it fell in front of the region visible to the Kinect and was not directly visible.  At each distance, the item would be tested six times, three on each side of the robot, and each trial would be recorded as either a true positive or false negative, with the former also classified by expected or unexpected turn direction.
+While \autoref{sec:approach} discussed the changes that were made to the code as a result of the challenges cataloged in \autoref{tab:tests}, we will now discuss the behavior of the final implementation when faced with these same scenarios.  In order to quantify the system's success rate, intensive testing of these cases was performed.
 
-When the autonomous robot encounters a wide obstacle, it is detected by both algorithms.  Additionally, the robot is not allowed to reverse the direction of its turn, so it cannot enter an oscillatory state.  A corollary to this behavior is that, if the robot is surrounded on all sides, it will continue spinning until freed.
+\subsection[Intensive testing]{Intensive testing by structured test cases}
+For each row of \autoref{tab:tests}, the specific cases given in the second column were tested at three different distances.  First, each object was tested at long range; it would be placed ahead of the robot's area of interest so that the robot would first encounter it as it was in the process of approaching.  Next, the object was placed at medium distance away, within the area of interest, before the algorithm was started, so that it was visible from the very beginning of the trial.  Finally, it was placed extremely close to the robot so that it fell in front of the region visible to the Kinect and was not directly visible.  At each distance, the item would be tested six times, three on each side of the robot, and each trial would be recorded as either a true positive or false negative, with the former also classified by expected or unexpected turn direction.
 
-Tall, thin obstacles with a limited base footprint such as a pen are best detected by the height range algorithm.  It is only thanks to the noise reduction attained by averaging several samples that it is able to spot such small objects.
+When the autonomous robot encounters a wide obstacle, both algorithms are able to sense it.  Additionally, the robot is not allowed to reverse the direction of its turn, so it cannot enter an oscillatory state.  A corollary to this behavior is that, if the robot is surrounded on all sides, it will continue spinning until freed.  During testing, the system was able to detect the sample object 100\textsuperscript{\%} of the time, as well as choose the appropriate turn direction in all cases except when the wall was in the closest configuration.  In such a case, the robot's view is completely blocked, and it is forced to decide on a direction arbitrarily unless it has already remembered one while processing a previous frame.
 
-In the case where an average obstacle appears in one side of the area of interest in front of the robot, it is detected by both algorithms.  Since the final revision of the cropping and downsampling approach decides directions based on the centroid of the points within the interest region, both approaches will advise turning in the same direction: away from the obstacle.
+Tall, thin obstacles with a limited base footprint such as a chair or table are best detected by the height range algorithm.  It is only thanks to the noise reduction attained by averaging several samples that it is able to spot such small objects.  Testing of this functionality revealed 100\textsuperscript{\%} accuracy for both detection and choice of direction.
 
-Short objects resting on the floor, including markers and pads of paper, are typically invisible to the cropping algorithm.  However, the curvature of the contact points between their edges and the ground plane is reliably detected by the other approach.
+Short objects resting on the floor, including markers and pads of paper, are typically invisible to the cropping algorithm.  However, the curvature of the contact points between their edges and the ground plane is usually detectable to the other approach, largely depending upon the distinctiveness of their edges and amount of contact area.  While the experimental results show only a 54\textsuperscript{\%} success rate for this type of challenge, it should be noted that 18 of the 25 false negatives occurred at the closest distance.  Detection was actually impossible in these cases because the objects had completely disappeared from the Kinect's field of view and weren't tall enough to occlude the visible region of the floor.  If this portion of the test is to be discounted, one instead finds an 81\textsuperscript{\%} accuracy, with the console cable detected every time.  Given that the pad of paper mimics the ground plane and the marker has very little floor contact, this detection rate seems reasonable.
 
-When a hole in the ground such as a descending staircase comes into view, the ground plane algorithm detects that the ground's absolute plane boundary has receded into an unexpected region.  All plane boundary points falling outside of the expected regions are treated identically to curvature points, and the direction recommendation is accordingly based on their centroid.
+When a hole in the ground such as a descending staircase comes into view, the ground plane algorithm detects that the ground's absolute plane boundary has receded into an unexpected region.  All plane boundary points falling outside of the expected regions are treated identically to curvature points, and the direction recommendation is accordingly based on their centroid.  Such situations were detected without error and resulted in the direction of the shorter turn the majority of the time.
 
-When an object of more than trivial height comes closer to the robot than the Kinect's point cloud is able to detect, it still distorts the emitted infrared grid so as to cast a ``shadow'' on the ground behind it.  The plane algorithm registers that the absolute plane boundary is infringing upon the center plane region, and the situation is treated in the same manner as the case of an approaching pit.
+Upon approaching a suspended or apparently-suspended object such as a bench or vending machine, the plane detection algorithm sees no change in the floor plane.  The cropping method, however, is able to see that an object is infringing upon the robot's height range, and directs it to turn away from the obstruction's centroid.  These threats were always detected, and test unit was low enough to the floor to obscure the Kinect's view of the ground by the time it was very close, so that even the close trials discovered its presence.  Of course, this ability would vary with the elevation of the bottom ledge of the object in question, as well as its depth if positioned in front of a wall.
 
-In case the robot comes close enough to an object that the Kinect's view is completely blocked, the ground plane algorithm is able to detect that it has been blinded by the complete disappearance of the floor plane.  In such a case, the robot is ordered to turn in the direction that was computed and stored when last the ground was visible.
-
-Upon approaching a suspended or apparently-suspended object such as a bench or vending machine, the plane detection algorithm sees no change in the floor plane.  The cropping method, however, is able to see that an object is infringing upon the robot's height range, and directs it to turn away from the obstruction's centroid.
-
-On the whole, the algorithms suffer from almost no problems with false positives.  However, the Kinect's infrared grid projection is masked by intense external infrared radiation.  If, for instance, the robot is approaching a patch of direct sunlight shining through a window, it will appear from the Kinect's point cloud as though there is a hole in the ground; the absolute plane boundary will begin to recede into the expected ground region.  Consequently, the robot will avoid such regions, treating them as actual danger.
+On the whole, the algorithms suffer from almost no problems with false positives.  However, intense external infrared radiation is capable of masking the Kinect's infrared grid.  If, for instance, the robot is approaching a patch of direct sunlight shining through a window, it will appear from the Kinect's point cloud as though there is a hole in the ground: the absolute plane boundary will begin to recede into the expected ground region.  Consequently, the robot will avoid such regions, treating them as actual danger.
 
 When face-to-face with an entirely transparent glass wall, the Kinect's infrared grid passes straight through the window.  Therefore, the barrier isn't reflected in the returned point cloud, and neither algorithm is able to see it at all.
 
-With the intensive test cases evaluated, the robot was released on all three floors of the building for unstructured test drives in order to determine how likely it was to encounter the already-tested situations.  Each time the robot turned, either a true positive or a false one was recorded, depending on whether there was actually an object in its way.  Additionally, false negatives were to be noted every time the robot actually ran into anything; however, this never occurred.  The results of this observation are noted in \autoref{tab:drives}.  Each false positive uncovered by the first two courses occurred during the robot's transition from a tile surface to a carpet, or vice versa, and resulted when the slight height changes between the surfaces triggered the ground plane curvature detection.  Such cases never resulted in more than a few degrees of turning before the robot resumed driving forward.  In the third and fourth trials, the robot drove across a floor with larger, less regular tiles; here, it would turn away from particularly uneven edges.  As before, it also picked up a few false positives when transitioning between floorings.  However the majority of the false positives in this case stemmed from sunlight:  While on the tile floor, it encountered several patches and spent some time wandering between them before being freed.
+\subsection[Extensive testing]{Extensive testing by environmental observation}
+With the intensive test cases evaluated, the robot was released on all three floors of the building for unstructured test drives in order to determine how likely it was to encounter the already-tested situations.  Each time the robot turned, either a true positive or a false one was recorded, depending on whether there was actually an object in its way.  Additionally, false negatives were to be noted every time the robot actually ran into anything; however, this never occurred in the test environment.  The results of such observation are noted in \autoref{tab:drives}.
+
+Each false positive uncovered by the first two courses occurred during the robot's transition from a tile surface to a carpet, or vice versa, and resulted when the slight height changes between the surfaces triggered the ground plane curvature detection, and could likely be solved simply by fine-tuning the ground plane curvature detection parameters.  Such cases never resulted in more than a few degrees of turning before the robot resumed driving forward.  In the third and fourth trials, the robot drove across a floor with larger, less regular tiles; here, it would turn away from particularly uneven edges.  As before, it also picked up a few false positives when transitioning between floorings.  However the majority of its unprompted turns in this case stemmed from sunlight:  While on the tile floor, it encountered several patches and spent some time wandering between them before being freed.
+
 The addition of the ground plane edge detection to the traditional obstacle avoidance solution brings several key advantages:  First, examining the curvature of the plane enables the detection of almost any obstacle that makes contact with the floor, including those that are very short.  Next, looking for absolute plane edges means hazards that have no corresponding obstacle within the robot's height range---such as holes in the ground---can be easily avoided.  Finally, since objects passing in front of the infrared emitter occlude the floor in front of the sensor, examining plane edges also reveals the presence of objects suddenly appearing very close to the sensor, including animate objects whose motion is perpendicular to the robot's; in this way, the algorithm is able to infer the presence of objects that are closer than the Kinect's hardware-limited minimum range.  The latter principle makes the plane analysis approach especially beneficial for sensors such as the Kinect that are unable to see objects closer than a certain distance away.
 
-As noted above, the complete implementation fails to perform in two of the test cases from \autoref{tab:tests}:  It is vulnerable to false positives in patches of direct sunlight and to false negatives in the case of transparent walls.  Such problems stem from the limitations of the infrared-based Kinect point cloud; however, they could likely be solved by examining the Kinect's RGB data in tandem with its depth values.
+As noted earlier, the complete implementation fails to perform in two specific cases:  It is vulnerable to false positives in patches of direct sunlight and to false negatives in the case of transparent walls.  Such problems stem from the limitations of the infrared-based Kinect point cloud; however, they could likely be solved by examining the Kinect's RGB data in tandem with its depth values.
 
 \begin{table}[h]
 \caption[Test drives]{Observations from unstructured test drives}
@@ -459,8 +458,8 @@ As noted above, the complete implementation fails to perform in two of the test 
 \scriptsize Third floor & 66 & 4 & 0 & 94\textsuperscript{\%} \\
 \hline
 \scriptsize Atrium, side wing & 105 & 17 & 0 & 85\textsuperscript{\%} \\
-\hline
-&&& \scriptsize\textbf{Overall:} & 93\textsuperscript{\%} \\
+\hline\hline
+\scriptsize\textbf{Overall:} & 255 & 24 & 0 & 91\textsuperscript{\%} \\
 \hline
 \end{tabular}
 \end{center}
