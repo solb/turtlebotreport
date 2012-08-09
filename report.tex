@@ -106,7 +106,9 @@ The goal was to implement a simple but effective obstacle detection and avoidanc
 \end{figure}
 
 \section{Similar Work (Literature Review)}
-Microsoft launched the Kinect on November 4, 2010 in order to add a new and innovative breed of entertainment to its XBox 360 gaming console.  However, the sensor caught the attention of researchers and software developers of all persuasions; as a result, and thanks to the effort of many dedicated hackers, open source drivers were soon available to facilitate its use for more diverse applications.  Using these drivers, researchers have since used the Kinect for room mapping, desktop application control, 3-D videoconferencing, surveillance, and even diagnosis and surgery.  When using RGB-D sensors on systems with limited resources, the largest stumbling block tends to be the computational cost of processing each frame of the cloud data.  In an attempt to alleviate this burden, Microsoft initially planned to include an onboard embedded microprocessor capable of many common operations, a feature that was cut from the production Kinect.  As a result, the full burden of working with the three-dimensional data continues to rest with the main CPU.
+Microsoft launched the Kinect on November 4, 2010, in order to add a new and innovative breed of entertainment to its XBox 360 gaming console.  However, the sensor immediately caught the attention of researchers and software developers of all persuasions; as a result, and thanks to the effort of many dedicated hackers, open source drivers were soon available to facilitate its use for more diverse applications.  Using these drivers, researchers have since used the Kinect for room mapping, desktop application control, 3-D videoconferencing, surveillance, and even diagnosis and surgery.
+
+When using RGB-D sensors on systems with limited resources, the largest stumbling block tends to be the computational cost of processing each frame of the cloud data.  In an attempt to alleviate this burden, Microsoft initially planned to include an onboard embedded microprocessor capable of many common image processing operations, a feature that was cut from the production Kinect.  As a result, the full burden of working with the three-dimensional data continues to rest with the main CPU.
 
 The XBox Kinect has an infrared projector and infrared camera separated by about 7.5 cm, and a color camera about 2 cm away from the latter (\hyperref[bib:nguyen]{Nguyen, 2012}).  The infrared pair is able to assemble a grid of distance measurements triangulated from the lateral displacement of the projected points from the known emitter pattern.  Unfortunately, the device is unable to perform any distance measurements closer than about 0.5 m.  One method of detecting obstacles is as follows:  First, perform a voxel grid downsampling on the point cloud to decrease processing time.  Next, apply a pass-through filter to crop out regions of little interest or accuracy.  Then, use the RANSAC algorithm to perform plane detection.  Finally, Euclidean cluster extraction reveals individual obstacles, and additional analysis of those obstacles is performed in order to determine their sizes.  This procedure avoids many difficulties of using a single RGB camera, as well as enjoying faster run times than dual--RGB camera systems.
 
@@ -123,7 +125,7 @@ Although the latter few approaches offer robust, proven functionality and are hi
 \section{Background}
 The Point Cloud Library includes many data types and numerous algorithms that make working with point clouds extraordinarily easy.  The first of the algorithms used in this research was the 3-D voxel grid filter, which downsamples point cloud data by modeling the input dataset with a three-dimensional grid having cubic cells of user-supplied dimensions (\hyperref[bib:rusu]{Rusu, 2011}).  Each cell containing at least one point in the original image is then populated with a single voxel placed at the centroid of the points within that part of the input.
 
-The research also made extensive use of the plane edge detection algorithms simultaneously developed by Changhyun Choi, a Ph.D. student at the Georgia Institute of Technology (\hyperref[bib:choi]{Choi, 2012}).  One of the utilized algorithms simply finds points bordering on those whose coordinates are set to NaN values, thereby computing the absolute boundaries of a plane.  Particularly useful was his high curvature edge detection algorithm, which locates the points making up the boundaries between the floor and those objects that rest on it using integral images and Canny edge detection.
+The research made extensive use of the plane edge detection algorithms simultaneously developed by Changhyun Choi, a Ph.D. student at the Georgia Institute of Technology (\hyperref[bib:choi]{Choi, 2012}).  One of the utilized algorithms simply finds points bordering on those whose coordinates are set to NaN values, thereby computing the absolute boundaries of a plane.  Particularly useful was his high curvature edge detection algorithm, which locates the points making up the boundaries between the floor and those objects that rest on it using integral images and Canny edge detection.
 
 Integral images are a common technique in modern computer vision, and are used to detect distinctive image features (\hyperref[bib:viola]{Viola and Jones, 2001}).  They are essentially tables storing for each coordinate in the corresponding image the sum of the pixel values lying in the box bounded by that coordinate and the upper-left corner of the image.  Features from an integral image can then be used for a wide variety of purposes, including estimation of a 3-D image's surface normals.
 
@@ -167,7 +169,7 @@ Sufficient deviation of the z-coordinate from its expected value allowed the con
 \label{fig:progressionbrief}
 \end{figure}
 
-This section of the report describes the development process of the project's algorithms and code.  A brief visual overview covering the major stages of development appears as \autoref{fig:progressionbrief}, and a sub-section providing a corresponding narrative of each stage follows.  The included Appendix provides practical information about using the robot, setting up a development environment, and upgrading the PCL installation, as well as a glossary of ROS-related terminology, lists of useful ROS commands and documentation resources, and a complete copy of the final version of the code for this project.
+This section of the report describes the development process of the project's algorithms and code.  A brief visual overview covering the major stages of development appears as \autoref{fig:progressionbrief}, and a sub-sections providing a corresponding narrative of each stage follow.  The included Appendix provides practical information about using the robot, setting up a development environment, and upgrading the PCL installation, as well as a glossary of ROS-related terminology, lists of useful ROS commands and documentation resources, and a complete copy of the final version of the code for this project.
 
 \subsection[Height range cropping]{The height range cropping algorithm}
 The point cloud coming off the Kinect exhibited noticeable noise, was extremely dense, and was consequently slow to transmit, display, and process.  Thus, the first action taken was the application of a voxel grid filter to downsample the data and eradicate most of the noise while achieving better update speeds and faster processing time.  Noticing that both Holz \textit{et al.} and Nguyen used surface detection algorithms, while Koren and Borenstein simply didn't train sensors on the floor, a decision was made to crop the y-dimension so as to discard all points falling outside the robot's height range.  This step---which was possible because the robot was going to be used chiefly in indoor environments possessing smooth terrain---made it possible to ignore the floor and focus exclusively on those points that represented actual obstacles.  However, it also meant sacrificing the ability to climb ramps and traverse highly uneven floors.
@@ -484,7 +486,7 @@ The time spent working on the project is addressed in \autoref{tab:hours}.  The 
 \hline
 5 & 3:00 & 13:00 & 3:00 & 10:00 & 3:00 & 32:00 \\
 \hline
-6 &  & 9:20 & 7:00 & 3:00 & 16:20 & 35:40 \\
+6 &  & 11:10 & 9:00 & 4:00 & 20:00 & 44:10 \\
 \hline
 7 &  & 18:00 & 8:00 & 5:00 & 14:00 & 45:00 \\
 \hline
@@ -492,9 +494,9 @@ The time spent working on the project is addressed in \autoref{tab:hours}.  The 
 \hline
 9 &  & 4:00 & 3:20 & 28:00 & 5:00 & 40:20 \\
 \hline
-10 &  &  &  &  &  & \\
+10 &  & 3:00 & 10:00 & 6:30 & 14:30 & 34:00 \\
 \hline\hline
-&&&&& \scriptsize\textbf{Total:} & \\
+&&&&& \scriptsize\textbf{Total:} & 385:00 \\
 \hline
 \end{tabular}
 \end{table}
